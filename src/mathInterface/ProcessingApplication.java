@@ -117,12 +117,29 @@ public class ProcessingApplication extends PApplet implements Observer {
 			mathProblemHandler.removeDigitFromAnswer();
 		}
 
-		usersAnswer.update(mathProblemHandler.currentAnswer());
+
+
+		updateUserAnswerDigits();
+
 
 	}
 
 
+	private void updateUserAnswerDigits(){
+		int[] userAnswerDigits=mathProblemHandler.currentAnswerDigits();
 
+		for(int i=0;i<userAnswerDigits.length;i++)
+			System.out.println("user answer digit: "+userAnswerDigits[i]);
+
+		int i=0;
+		for(;i<userAnswerDigits.length;i++){
+			userAnswerDigitsTextObjects[i].update(userAnswerDigits[i]);
+		}
+		for(;i<userAnswerDigitsTextObjects.length;i++){
+			userAnswerDigitsTextObjects[i].update("");
+		}
+
+	}
 
 
 
@@ -164,30 +181,35 @@ public class ProcessingApplication extends PApplet implements Observer {
 
 	public DisplayScreen makeEmptyScreenSizedToApplication() {
 		DisplayScreen screen=new DisplayScreen(0,0, APPLICATION_WIDTH,APPLICATION_HEIGHT);
-	    screen.setBackgroundColor(UI_BACKGROUND_COLOR);
-	    return screen;
+		screen.setBackgroundColor(UI_BACKGROUND_COLOR);
+		return screen;
 	}
 
 
 
 	public void handleSubmittedAnswer() {
 		//prevent user re submitting after feedback has started.
-		if(feedbackManifester.feedbackInProcess()) return;
-		mathProblemHandler.updateUserScore();
-		feedbackManifester.provideFeedback(mathProblemHandler.currentProblem());
-
+		if(feedbackManifester.acceptingResponse()){
+			mathProblemHandler.updateUserScore();
+			feedbackManifester.provideFeedback(mathProblemHandler.currentProblem());
+		}
 	}
 
 
-	//refactr to do: make another object for the current problem, and update the problem instead of creating a brand new tdo each time.
-	//i want all that (plus this tod and these methods) to go into a UI handler method or something like that
-
-	VariableText usersAnswer;
+	private VariableText[] userAnswerDigitsTextObjects;
 	private void setupNextProblemAndUpdateUI(){
-		usersAnswer=new VariableText(0,UI_FONT_COLOR,0,0,UI_FONT_SIZE);
+		VariableText usersAnswerFirstDigit=new VariableText("x",UI_FONT_COLOR,-UI_FONT_SIZE/2-UI_FONT_SIZE/4,0,UI_FONT_SIZE);
+		VariableText usersAnswerSecondDigit=new VariableText("x",UI_FONT_COLOR,0,0,UI_FONT_SIZE);
+		VariableText usersAnswerThirdDigit=new VariableText("x",UI_FONT_COLOR,UI_FONT_SIZE/2+UI_FONT_SIZE/4,0,UI_FONT_SIZE);
+		userAnswerDigitsTextObjects=new  VariableText[]{usersAnswerFirstDigit,usersAnswerSecondDigit,usersAnswerThirdDigit};
 		mathProblemHandler.prepareNextProblem();
 		mathProblemUI.clearAnswerScreen();
-		mathProblemUI.getAnswerScreen().addVariableText(usersAnswer);
+
+
+		for(int i=0;i<userAnswerDigitsTextObjects.length;i++){
+			mathProblemUI.getAnswerScreen().addVariableText(userAnswerDigitsTextObjects[i]);
+		}
+
 		mathProblemUI.updateProblemScreen(mathProblemHandler.currentProblem());
 	}
 

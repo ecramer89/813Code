@@ -223,7 +223,7 @@ public class UI  {
 
 
 	public DisplayScreen getAnswerScreen() {
-		// TODO Auto-generated method stub
+	
 		return answerScreen;
 	}
 
@@ -233,7 +233,7 @@ public class UI  {
 	}
 
 	public DisplayScreen getAnswerScreenTransform(){
-		return problemScreen.getTransform();
+		return answerScreen.getTransform();
 	}
 
 

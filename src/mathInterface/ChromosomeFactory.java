@@ -38,6 +38,18 @@ public class ChromosomeFactory {
 		Gene attributeIsolationDurationGene=new IntegerGene(conf, 100,MAX_DELAY*2);
 
 
+		Gene pDirectiveGene = new DoubleGene(conf, .99, 1);
+		Gene delayUntilDirectiveGene = new IntegerGene(conf, 0, MAX_DELAY);
+		Gene pCorrectAnswerGene = new DoubleGene(conf, .99, 1);
+		Gene correctAnswerDelay = new IntegerGene(conf, 0, MAX_DELAY);
+		Gene pErrorFlagGene = new DoubleGene(conf, .99, 1);
+		Gene errorFlagDelayGene= new IntegerGene(conf, 0, MAX_DELAY);
+		
+	    Gene pAllowResubmitGene = new DoubleGene(conf,.99,1);
+		
+		
+		
+		
 		Gene[] genes = new Gene[GenePosition.values().length];
 
 		genes[GenePosition.USER_SCORE.ordinal()] = userScoreGene;
@@ -58,6 +70,14 @@ public class ChromosomeFactory {
 		genes[GenePosition.P_ATTRIBUTE_ISOLATION.ordinal()]=pAttributeIsolationGene;
 		genes[GenePosition.ATTRIBUTE_ISOLATION_DURATION.ordinal()]=attributeIsolationDurationGene;
 
+		genes[GenePosition.P_DIRECTIVE.ordinal()]=pDirectiveGene;
+		genes[GenePosition.DIRECTIVE_DELAY.ordinal()]=delayUntilDirectiveGene;
+		genes[GenePosition.P_CORRECT_RESPONSE.ordinal()]=pCorrectAnswerGene;
+		genes[GenePosition.CORRECT_RESPONSE_DELAY.ordinal()]=correctAnswerDelay;
+		genes[GenePosition.P_ERROR_FLAG.ordinal()]=pErrorFlagGene;
+		genes[GenePosition.ERROR_FLAG_DELAY.ordinal()]=errorFlagDelayGene;
+        genes[GenePosition.P_ALLOW_RESUBMIT.ordinal()]=pAllowResubmitGene;
+		
 
 
 		return genes;

@@ -208,14 +208,26 @@ public class DisplayScreen extends Observable {
 
 
 	public int getHeight() {
-		// TODO Auto-generated method stub
+		
 		return height;
 	}
 
 	
 	public int getWidth() {
-		// TODO Auto-generated method stub
+		
 		return width;
+	}
+
+
+	public void translate(int dx, int dy) {
+		offset_x+=dx;
+		offset_y+=dy;
+	}
+
+
+	public VariableText getVariableText(int index) {
+		// TODO Auto-generated method stub
+		return text.get(index);
 	}
 
 

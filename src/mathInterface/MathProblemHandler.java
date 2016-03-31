@@ -8,9 +8,9 @@ public class MathProblemHandler {
 
 
 	static MathProblemHandler instance;
-	static final int MATH_PROBLEMS_PER_SET=4;
-	static final int MAX_ARGUMENT_VALUE=3;
-    static final int MAX_DIGITS_IN_ANSWER=3;
+	public static final int MATH_PROBLEMS_PER_SET=4;
+	public static final int MAX_ARGUMENT_VALUE=3;
+	public static final int MAX_DIGITS_IN_ANSWER=3;
 
 	static MathProblemSet currentProblemSet;
 
@@ -85,6 +85,11 @@ public class MathProblemHandler {
 			currentProblemSet.incrementNumProblemsAnsweredCorrectly();
 		}
 		
+	}
+
+	public int[] currentAnswerDigits() {
+
+		return currentProblem.getAnswerDigits();
 	}
 
 

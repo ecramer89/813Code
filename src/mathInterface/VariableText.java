@@ -45,4 +45,9 @@ public class VariableText {
 		
 	}
 
+
+	public void updateColor(int[] newColor) {
+		color=newColor;	
+	}
+
 }
