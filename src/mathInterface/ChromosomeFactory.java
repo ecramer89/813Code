@@ -40,12 +40,12 @@ public class ChromosomeFactory {
 
 		Gene pDirectiveGene = new DoubleGene(conf, .99, 1);
 		Gene delayUntilDirectiveGene = new IntegerGene(conf, 0, MAX_DELAY);
-		Gene pCorrectAnswerGene = new DoubleGene(conf, .99, 1);
+		Gene pCorrectAnswerGene = new DoubleGene(conf, .5, 1);
 		Gene correctAnswerDelay = new IntegerGene(conf, 0, MAX_DELAY);
-		Gene pErrorFlagGene = new DoubleGene(conf, .99, 1);
+		Gene pErrorFlagGene = new DoubleGene(conf, .5, 1);
 		Gene errorFlagDelayGene= new IntegerGene(conf, 0, MAX_DELAY);
 		
-	    Gene pAllowResubmitGene = new DoubleGene(conf,.99,1);
+	    Gene pAllowResubmitGene = new DoubleGene(conf,.5,1);
 		
 		
 		

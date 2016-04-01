@@ -52,9 +52,13 @@ public class MathProblem {
 	}
 
 	public static MathProblem makeRandomProblem(int min_arg, int max_arg){
-		int arg1=makeRandomArgument(min_arg,max_arg);
-		int arg2=makeRandomArgument(min_arg, max_arg);
-		MathOperator op = MathOperator.getRandomOperator();
+		int arg1, arg2;
+		MathOperator op;
+		
+		arg1=makeRandomArgument(min_arg,max_arg);
+		arg2=makeRandomArgument(min_arg, max_arg);
+		op = MathOperator.getRandomOperator();
+	
 		return new MathProblem(op,arg1,arg2);
 	}
 

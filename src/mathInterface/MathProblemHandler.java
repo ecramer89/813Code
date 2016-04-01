@@ -9,7 +9,7 @@ public class MathProblemHandler {
 
 	static MathProblemHandler instance;
 	public static final int MATH_PROBLEMS_PER_SET=4;
-	public static final int MAX_ARGUMENT_VALUE=3;
+	public static final int MAX_ARGUMENT_VALUE=9;
 	public static final int MAX_DIGITS_IN_ANSWER=3;
 
 	static MathProblemSet currentProblemSet;
@@ -17,6 +17,7 @@ public class MathProblemHandler {
 	//the current problem
 	MathProblem currentProblem;
 
+	
 	private MathProblemHandler(){
 		initializeNewProblemSet();
 	}
@@ -91,6 +92,7 @@ public class MathProblemHandler {
 
 		return currentProblem.getAnswerDigits();
 	}
+
 
 
 

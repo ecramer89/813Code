@@ -128,9 +128,6 @@ public class ProcessingApplication extends PApplet implements Observer {
 	private void updateUserAnswerDigits(){
 		int[] userAnswerDigits=mathProblemHandler.currentAnswerDigits();
 
-		for(int i=0;i<userAnswerDigits.length;i++)
-			System.out.println("user answer digit: "+userAnswerDigits[i]);
-
 		int i=0;
 		for(;i<userAnswerDigits.length;i++){
 			userAnswerDigitsTextObjects[i].update(userAnswerDigits[i]);
@@ -175,6 +172,7 @@ public class ProcessingApplication extends PApplet implements Observer {
 		feedbackManifester.updateFeedbackChromosome(currentPopulation.next());
 		feedbackManifester.initializeFeedbackScreens();
 		mathProblemUI.setFeedbackScreens(feedbackManifester.getFeedbackScreens());
+	
 	}
 
 
@@ -186,22 +184,31 @@ public class ProcessingApplication extends PApplet implements Observer {
 	}
 
 
-
+    int numAttempts;
+    boolean isFirstAttemptAtThisProblem(){
+    	return numAttempts==1;
+    }
 	public void handleSubmittedAnswer() {
 		//prevent user re submitting after feedback has started.
+		numAttempts++;
 		if(feedbackManifester.acceptingResponse()){
-			mathProblemHandler.updateUserScore();
+		    if(isFirstAttemptAtThisProblem()){
+		    	mathProblemHandler.updateUserScore();
+		    }
 			feedbackManifester.provideFeedback(mathProblemHandler.currentProblem());
 		}
 	}
 
 
-	private VariableText[] userAnswerDigitsTextObjects;
+	private VariableText[] userAnswerDigitsTextObjects=new VariableText[3];
 	private void setupNextProblemAndUpdateUI(){
+		numAttempts=0;
 		VariableText usersAnswerFirstDigit=new VariableText("x",UI_FONT_COLOR,-UI_FONT_SIZE/2-UI_FONT_SIZE/4,0,UI_FONT_SIZE);
 		VariableText usersAnswerSecondDigit=new VariableText("x",UI_FONT_COLOR,0,0,UI_FONT_SIZE);
 		VariableText usersAnswerThirdDigit=new VariableText("x",UI_FONT_COLOR,UI_FONT_SIZE/2+UI_FONT_SIZE/4,0,UI_FONT_SIZE);
-		userAnswerDigitsTextObjects=new  VariableText[]{usersAnswerFirstDigit,usersAnswerSecondDigit,usersAnswerThirdDigit};
+		userAnswerDigitsTextObjects[0]=usersAnswerFirstDigit;
+		userAnswerDigitsTextObjects[1]=usersAnswerSecondDigit;
+		userAnswerDigitsTextObjects[2]=usersAnswerThirdDigit;
 		mathProblemHandler.prepareNextProblem();
 		mathProblemUI.clearAnswerScreen();
 
@@ -213,16 +220,15 @@ public class ProcessingApplication extends PApplet implements Observer {
 		mathProblemUI.updateProblemScreen(mathProblemHandler.currentProblem());
 	}
 
-	private void resetFeedbackScreensAndUpdateUI(){
-		feedbackManifester.initializeFeedbackScreens();
-		mathProblemUI.setFeedbackScreens(feedbackManifester.getFeedbackScreens());
+	private void resetFeedbackScreens(){
+		feedbackManifester.resetFeedbackScreens();
 	}
 
 
 	public void feedbackDone(){
 		if(!mathProblemHandler.currentProblemSetFinished()){
 			setupNextProblemAndUpdateUI();
-			resetFeedbackScreensAndUpdateUI();
+			resetFeedbackScreens();
 		}
 		else {
 			if(currentPopulation.hasNext()){

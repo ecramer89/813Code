@@ -48,6 +48,12 @@ public class DisplayScreen extends Observable {
 	
 	}
 
+	
+	public void reset(){
+		
+		activation_time=HAS_NOT_BEEN_STARTED;
+		time_elapsed_since_activated=0;
+	}
 
 	public void setImage(PImage img){
 		this.img=img;
@@ -135,7 +141,6 @@ public class DisplayScreen extends Observable {
 	}
 
 	private void display(){
-
 		processing.pushMatrix();
 		renderBackground();
 		renderImage();

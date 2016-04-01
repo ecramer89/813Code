@@ -63,15 +63,15 @@ public class ChromosomeToFeedbackManifester implements Observer {
 
 	static PImage DEFAULT_CORRECT_VERIFICATION_IMAGE=null;
 	static PImage DEFAULT_INCORRECT_VERIFICATION_IMAGE=null;
-	
-	
+
+
 	static final String RESUBMIT_MESSAGE="Try again!";
-	private VariableText allowResubmitText=new VariableText(RESUBMIT_MESSAGE,ProcessingApplication.UI_FONT_COLOR,0,0,ProcessingApplication.UI_FONT_SIZE);
+	private VariableText allowResubmitText;
 
 	IChromosome individual;
 	/*parameters that are interpreted from the individual (chromosome)*/
 	private double feedback_delay;
-	
+
 	/* for directive feedback */
 	private double p_directive=1.0;
 	private int directive_delay;
@@ -95,8 +95,8 @@ public class ChromosomeToFeedbackManifester implements Observer {
 
 	private double p_allow_resubmit;
 	private boolean allowing_resubmission;
-	
-	
+
+
 	/*variables particular to different feedback events*/
 	/*general*/
 	private int[] text_color=new int[]{0,0,0};
@@ -129,19 +129,19 @@ public class ChromosomeToFeedbackManifester implements Observer {
 
 	private List<DisplayScreen> feedbackScreens;
 	private int numScreensCompleted=PRE_FEEDBACK;
-	
-	
-	
-	
-
-
-
 
 
 	private ChromosomeToFeedbackManifester(){
 		processing=(ProcessingApplication) ProcessingApplication.getInstance();
-
+		allowResubmitText=new VariableText(RESUBMIT_MESSAGE,ProcessingApplication.UI_FONT_COLOR,0,0,ProcessingApplication.UI_FONT_SIZE);
 		loadImages();
+	}
+	
+	
+	public void resetFeedbackScreens(){
+		for(DisplayScreen screen : feedbackScreens){
+			screen.reset();
+		}
 	}
 
 	private void loadImages() {
@@ -175,10 +175,10 @@ public class ChromosomeToFeedbackManifester implements Observer {
 		updateVerificationParameters();
 		updateElaborationParameters();
 		updateDirectiveFeedbackParameters();
-		
+
 		updateAllowingResubmission();
 	}
-	
+
 	private void updateAllowingResubmission(){
 		p_allow_resubmit=getDoubleAllelle(GenePosition.P_ALLOW_RESUBMIT);
 	}
@@ -264,6 +264,7 @@ public class ChromosomeToFeedbackManifester implements Observer {
 
 	/* methods for providing the feedback, assuming the variables were set */
 	public void provideFeedback(MathProblem problem) {
+		
 		resetPerFeedbackVariables();
 		updateFeedbackScreensAccordingToProblemData(problem);
 		startFeedbackScreens(problem);
@@ -271,6 +272,7 @@ public class ChromosomeToFeedbackManifester implements Observer {
 
 	private void resetPerFeedbackVariables(){
 		numScreensCompleted=0;
+		numActiveScreens=0;
 		allowing_resubmission=false;
 
 	}
@@ -293,7 +295,7 @@ public class ChromosomeToFeedbackManifester implements Observer {
 	//the references to the screens variables texts. thats what we wanted anyway.
 	private void updateErrorFlagScreen(MathProblem problem) {
 
-
+        
 		//figure out which digits don't match the solution
 		//highlight those digits in red.
 		int[] userAnswerDigits=problem.getAnswerDigits();
@@ -315,10 +317,17 @@ public class ChromosomeToFeedbackManifester implements Observer {
 				}
 			}
 		}
+		
+		//clear out digits that might be saved in the VT objects from previous answer.
+		for(;in_answer<MathProblemHandler.MAX_DIGITS_IN_ANSWER;in_answer++){
+			errorFlagScreen.getVariableText(in_answer).update("");	
+		}
 
 	}
 
 	private void updateCorrectAnswerScreen(MathProblem problem) {
+		
+		correctAnswerScreen.clearText();
 		correctAnswerScreen.addVariableText(new VariableText(problem.solution, CORRECT_VERIFICATION_COLOR, 0,0,processing.UI_FONT_SIZE));
 	}
 
@@ -334,6 +343,7 @@ public class ChromosomeToFeedbackManifester implements Observer {
 	//resize TODO after change the text thingy
 	//god plz refactor this
 	private void updateAttributeIsolationScreen(MathProblem problem) {
+		attributeIsolationScreen.clearText();
 		attributeIsolationScreen.addVariableText(new VariableText(problem.arg1, processing.UI_FONT_COLOR,-processing.UI_FONT_SIZE*2,0,processing.UI_FONT_SIZE));
 		attributeIsolationScreen.addVariableText(new VariableText(" ", processing.UI_FONT_COLOR,-processing.UI_FONT_SIZE*2+processing.UI_FONT_SIZE/2,0,processing.UI_FONT_SIZE));
 		attributeIsolationScreen.addVariableText(new VariableText(problem.op, ATTRIBUTE_HIGHLIGHT_COLOR,-processing.UI_FONT_SIZE*2+processing.UI_FONT_SIZE,0,processing.UI_FONT_SIZE));
@@ -354,15 +364,18 @@ public class ChromosomeToFeedbackManifester implements Observer {
 
 	}
 
+	
+	 int numActiveScreens;
 	private void startFeedbackScreens(MathProblem problem){
 		//always verify
 		activateScreen(verificationScreen);
 
+		
 		startDirectiveScreens();
 		startElaborationScreens();
-		
+
 		//sometimes allow resubmission
-		
+
 		decideIfAllowResubmission(problem);
 
 	}
@@ -370,7 +383,7 @@ public class ChromosomeToFeedbackManifester implements Observer {
 
 	private void decideIfAllowResubmission(MathProblem problem) {
 		allowing_resubmission=!problem.currentAnswerIsCorrect()&&eventOccurs(p_allow_resubmit);
-		
+
 	}
 
 	private void startElaborationScreens() {
@@ -381,6 +394,7 @@ public class ChromosomeToFeedbackManifester implements Observer {
 				if(eventOccurs(p_attribute_isolation)) {
 					activateScreen(attributeIsolationScreen);
 					nothingActivated=false;
+					
 				}
 
 			}
@@ -396,11 +410,13 @@ public class ChromosomeToFeedbackManifester implements Observer {
 				if(eventOccurs(p_correct_answer)) {
 					activateScreen(correctAnswerScreen);
 					nothingActivated=false;
+					
 				}
 
 				if(eventOccurs(p_error_flag)) {
 					activateScreen(errorFlagScreen);
 					nothingActivated=false;
+					
 				}		
 
 			}
@@ -411,6 +427,7 @@ public class ChromosomeToFeedbackManifester implements Observer {
 	private void activateScreen(DisplayScreen screen){
 		screen.addObserver(this);
 		screen.activate();
+		numActiveScreens++;
 	}
 
 
@@ -483,17 +500,17 @@ public class ChromosomeToFeedbackManifester implements Observer {
 		verificationScreen.setName("verification");
 		verificationScreen.addVariableText(verification_text);	
 	}
-	
-	
-	
+
+
+
 	private void initializeResubmitScreen(){
-	  allowResubmitScreen=processing.makeEmptyScreenSizedToApplication();
-      allowResubmitScreen.setTransparent(false);
-      allowResubmitScreen.setBackgroundColor(processing.UI_BACKGROUND_COLOR);
-	  allowResubmitScreen.setDurationOfDisplay(DEFAULT_SCREEN_DURATION*2);
-	  allowResubmitScreen.addVariableText(allowResubmitText);
-	
-	
+		allowResubmitScreen=setupEmptyFeedbackScreenAndAddToListOfFeedbackScreens(processing.makeEmptyScreenSizedToApplication());
+		allowResubmitScreen.setTransparent(false);
+		allowResubmitScreen.setBackgroundColor(processing.UI_BACKGROUND_COLOR);
+		allowResubmitScreen.setDurationOfDisplay(DEFAULT_SCREEN_DURATION);
+		allowResubmitScreen.addVariableText(allowResubmitText);
+		allowResubmitScreen.setName("allow resubmit");
+
 	}
 
 	DisplayScreen setupEmptyFeedbackScreenAndAddToListOfFeedbackScreens(DisplayScreen screen) {
@@ -511,16 +528,17 @@ public class ChromosomeToFeedbackManifester implements Observer {
 			DisplayScreen done = (DisplayScreen)arg0;
 			numScreensCompleted++;
 			done.deleteObserver(this); //de register or else we keep receiving updates.
-			if(numScreensCompleted==feedbackScreens.size()){
+
+			if(allowing_resubmission&&numScreensCompleted==feedbackScreens.size()-1){
+				activateScreen(allowResubmitScreen);	
+			}
+
+			if(allowing_resubmission&&numScreensCompleted==feedbackScreens.size()||(numScreensCompleted==feedbackScreens.size()-1&&!allowing_resubmission)){
 				//feedback done; tell processing app.
 				numScreensCompleted=PRE_FEEDBACK;
 				if(!allowing_resubmission){
 					processing.feedbackDone();
 				}
-				else {
-					allowResubmitScreen.activate();
-				}
-				
 			}
 
 		}
@@ -529,9 +547,9 @@ public class ChromosomeToFeedbackManifester implements Observer {
 
 
 	public boolean acceptingResponse(){
-		return !allowResubmitScreen.isActive()&&!feedbackInProcess();//numScreensCompleted!=PRE_FEEDBACK&&numScreensCompleted<feedbackScreens.size();
+		return (!allowResubmitScreen.isActive()||allowResubmitScreen.isDone())&&!feedbackInProcess();
 	}
-	
+
 	private boolean feedbackInProcess(){
 		return numScreensCompleted!=PRE_FEEDBACK&&numScreensCompleted<feedbackScreens.size();
 
