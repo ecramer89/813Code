@@ -63,9 +63,8 @@ public class DisplayScreen extends Observable {
 				img.resize(img.width/2, img.height/2);
 			}
 			
-			img_offset_x=text_offset_x;
-			img_offset_y=text_offset_y+text_size+img.width/2;
-
+			adjustImageOffset(text_offset_x,text_offset_y+text_size);
+		
 		}	
 	}
 
@@ -85,9 +84,12 @@ public class DisplayScreen extends Observable {
 		this.text.add(text);
 	}
 
-
-	public void setDelayBeforeDisplay(int delay) {
+	public void setDelayBeforeDisplay(int delay){
 		this.delay_time=delay;
+	}
+
+	public void adjustDelayBeforeDisplay(int adjustment) {
+		this.delay_time+=adjustment;
 	}
 
 	public void setDurationOfDisplay(int duration) {
@@ -236,8 +238,23 @@ public class DisplayScreen extends Observable {
 	}
 
 
+	public int getDelayBeforeDisplay() {
+		// TODO Auto-generated method stub
+		return delay_time;
+	}
 
 
+	public int getDurationOfDisplay() {
+		// TODO Auto-generated method stub
+		return display_time;
+	}
+
+
+
+  public void adjustImageOffset(int off_x, int off_y){
+	  img_offset_x+=off_x;
+	  img_offset_y+=off_y;
+  }
 
 
 

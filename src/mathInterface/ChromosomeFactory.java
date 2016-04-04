@@ -12,7 +12,7 @@ public class ChromosomeFactory {
 
 
 	//in milliseconds
-	private static final int MAX_DELAY = 400;
+	private static final int MAX_DELAY = 2000;
 
 	/*Prepares a set of sample genes for use by the configuration code
 	 * just needs to specify the variable types and limits on each gene in the chromosome */
@@ -23,7 +23,7 @@ public class ChromosomeFactory {
 		Gene textGGene= new IntegerGene(conf, 0, 255);
 		Gene textBGene= new IntegerGene(conf, 0, 255);
 
-		Gene delayGene = new DoubleGene(conf, 0, MAX_DELAY);
+		Gene delayGene = new IntegerGene(conf, 0, MAX_DELAY);
 
 		Gene userScoreGene = new DoubleGene(conf, 0, 100.0);
 
@@ -31,14 +31,14 @@ public class ChromosomeFactory {
 		Gene verificationModalityGene=new IntegerGene(conf,0,5);
 
 
-		Gene pElaborateGene=new DoubleGene(conf, .99,1);
+		Gene pElaborateGene=new DoubleGene(conf, .5,1);
 		Gene delayUntilElaborateGene=new IntegerGene(conf, 0,MAX_DELAY);
 		//given elaboration occurred.
-		Gene pAttributeIsolationGene=new DoubleGene(conf, .99,1);
+		Gene pAttributeIsolationGene=new DoubleGene(conf, .5,1);
 		Gene attributeIsolationDurationGene=new IntegerGene(conf, 100,MAX_DELAY*2);
 
 
-		Gene pDirectiveGene = new DoubleGene(conf, .99, 1);
+		Gene pDirectiveGene = new DoubleGene(conf, .5, 1);
 		Gene delayUntilDirectiveGene = new IntegerGene(conf, 0, MAX_DELAY);
 		Gene pCorrectAnswerGene = new DoubleGene(conf, .5, 1);
 		Gene correctAnswerDelay = new IntegerGene(conf, 0, MAX_DELAY);

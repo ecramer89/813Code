@@ -14,10 +14,10 @@ public class ProcessingApplication extends PApplet implements Observer {
 	public static final int APPLICATION_WIDTH=800;
 	public static final int APPLICATION_HEIGHT=600;
 	public static final int NUM_GENERATIONS=3;
-	public static final int POPULATION_SIZE=6;
+	public static final int POPULATION_SIZE=3;
 
 	public static ChromosomeToFeedbackManifester feedbackManifester;
-	JGAPAdapter JGAPAdapter;
+	JGAPAdapter jgapAdaptor;
 	UI mathProblemUI;
 	MathProblemHandler mathProblemHandler;
 
@@ -56,7 +56,7 @@ public class ProcessingApplication extends PApplet implements Observer {
 	public void setup(){
 		processingAppInstance=this;
 		feedbackManifester=ChromosomeToFeedbackManifester.getInstance();
-		JGAPAdapter=JGAPAdapter.getInstance();
+		jgapAdaptor=JGAPAdapter.getInstance();
 		mathProblemUI=UI.getInstance();
 		mathProblemHandler=MathProblemHandler.getInstance();
 
@@ -91,6 +91,14 @@ public class ProcessingApplication extends PApplet implements Observer {
 		if(state==UPDATING_POPULATION){
 			updateDisplayablePopulationTimer();
 		}
+		
+		
+		//for testing
+		int[] col=feedbackManifester.currFeedbackColor();
+		fill(col[0],col[1],col[2]);
+		textSize(20);
+		textAlign(CENTER);
+		text(feedbackManifester.currFeedback(), width/2, height-40);
 
 	}
 
@@ -147,7 +155,7 @@ public class ProcessingApplication extends PApplet implements Observer {
 
 	private void configureGenotype(){
 		try {
-			JGAPAdapter.createInitialGenotype();
+			jgapAdaptor.createInitialGenotype();
 		} catch (InvalidConfigurationException e) {
 			e.printStackTrace();
 		}
@@ -157,7 +165,7 @@ public class ProcessingApplication extends PApplet implements Observer {
 
 	private void storeReferenceToCurrentPopulation(){
 
-		currentPopulation=JGAPAdapter.iterator();
+		currentPopulation=jgapAdaptor.iterator();
 	}
 
 
@@ -166,13 +174,11 @@ public class ProcessingApplication extends PApplet implements Observer {
 		//get a fresh new set of problems
 		mathProblemHandler.initializeNewProblemSet();
 		mathProblemHandler.createRandomProblems();
-		//setup first problem
-		setupNextProblemAndUpdateUI();
 		//update feedback variables
 		feedbackManifester.updateFeedbackChromosome(currentPopulation.next());
 		feedbackManifester.initializeFeedbackScreens();
-		mathProblemUI.setFeedbackScreens(feedbackManifester.getFeedbackScreens());
-	
+		//setup first problem
+		setupNextProblemAndUpdateUI();	
 	}
 
 
@@ -218,27 +224,33 @@ public class ProcessingApplication extends PApplet implements Observer {
 		}
 
 		mathProblemUI.updateProblemScreen(mathProblemHandler.currentProblem());
+		
+		
+		
+		
 	}
 
 	private void resetFeedbackScreens(){
 		feedbackManifester.resetFeedbackScreens();
 	}
 
-
+int times=0;
 	public void feedbackDone(){
+		System.out.println("called feedback done "+(++times));
 		if(!mathProblemHandler.currentProblemSetFinished()){
 			setupNextProblemAndUpdateUI();
-			resetFeedbackScreens();
+			resetFeedbackScreens(); 
 		}
 		else {
 			if(currentPopulation.hasNext()){
 				//store user score as the individual's fitness
+				
 				configureApplicationForNextIndividual();
 			}
 			else {
 				generationNumber++;
 				if(generationNumber<NUM_GENERATIONS){
-					JGAPAdapter.updatePopulation();
+					jgapAdaptor.updatePopulation();
 					storeReferenceToCurrentPopulation();
 					state=UPDATING_POPULATION;
 					populationUpdateTimer.update(0);
