@@ -9,21 +9,33 @@ import org.jgap.IChromosome;
  */
 public class IECFitnessFunction extends FitnessFunction {
 
-
+	private boolean incorporateUserRating=true;
 
 	@Override
 	protected double evaluate(IChromosome a_subject) {
-		Double userScore= (Double)a_subject.getGene(GenePosition.USER_SCORE.ordinal()).getAllele();
-		return userScore.doubleValue();
+		double expectedFitness=FeedbackTemplate.calculateFitnessForChildAptitude(ChromosomeToFeedbackManifester.createFeedback(a_subject));
+		
+		
+		double userScore=0;
+		if(incorporateUserRating){
+			userScore= (Double)a_subject.getGene(GenePosition.USER_SCORE.ordinal()).getAllele();
+		}
+		return userScore;
 		//to do... maybe incorporate distance from prototype feedback strategies?
 	}
 
+	public void setIncorporateUserRating(boolean incorporate){
+		incorporateUserRating=incorporate;
+	}
 
 
 
 	public static void setUserScore(IChromosome a_subject, double score){
 		a_subject.getGene(GenePosition.USER_SCORE.ordinal()).setAllele(score);	
 	}
+	
+	
+	
 }
 
 

@@ -32,7 +32,7 @@ public class Button {
 		setPressedAndDisplayColors();
 	}
 	
-	void setPressedAndDisplayColors(){
+	private void setPressedAndDisplayColors(){
 		pressedColor=new float[]{defaultColor[0]/2, defaultColor[1]/2, defaultColor[2]/2};
 		displayColor=defaultColor;
 	}

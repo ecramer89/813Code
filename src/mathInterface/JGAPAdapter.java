@@ -21,8 +21,13 @@ import org.jgap.impl.IntegerGene;
 
 public class JGAPAdapter implements Iterable<IChromosome> {
 
-	 static JGAPAdapter theInstance;
+	 public static final boolean ONLY_RANK_BY_TEMPLATES = false;
+	 public static final boolean INCOPORATE_USER_SCORE_INTO_RANKING = true;
+	 
+	 
+	static JGAPAdapter theInstance;
 	 Genotype genotype;
+	 IECFitnessFunction fitnessFunction;
 	 
 	 private JGAPAdapter(){}
 	 
@@ -34,8 +39,8 @@ public class JGAPAdapter implements Iterable<IChromosome> {
 	 
 	 public void createInitialGenotype() throws InvalidConfigurationException{
 		 Configuration conf=new DefaultConfiguration();
-	      FitnessFunction myfunction=new IECFitnessFunction();
-	      conf.setFitnessFunction(myfunction);
+	      fitnessFunction=new IECFitnessFunction();
+	      conf.setFitnessFunction(fitnessFunction);
 	      
 	      //create a sample chromosome to indicate
 	      //to the configuration object how we want the chromosome to be setup.
@@ -60,7 +65,8 @@ public class JGAPAdapter implements Iterable<IChromosome> {
 		return genotype.getPopulation().getChromosomes().iterator();
 	}
 
-	public void updatePopulation() {
+	public void updatePopulation(boolean incorporateUserRating) {
+		fitnessFunction.setIncorporateUserRating(incorporateUserRating);
 		genotype.evolve();
 		
 	}

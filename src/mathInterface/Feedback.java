@@ -18,12 +18,12 @@ public class Feedback extends Observable implements Observer  {
 	static final int IMPLICIT_CORRECT_VERIFICATION=1;
 	static final int IMPLICIT_INCORRECT_VERIFICATION=2;
 	//verification modality int codes
-	private static final int TEXT_IMAGE_VERIFICATION = 0;
-	private static final int ALL_VERIFICATION = 1;
-	private static final int IMAGE_AUDIO_VERIFICATION = 2;
-	private static final int TEXT_VERIFICATION = 3;
-	private static final int TEXT_AUDIO_VERIFICATION = 4;
-	private static final int IMAGE_VERIFICATION = 5;
+	public static final int TEXT_IMAGE_VERIFICATION = 0;
+	public static final int ALL_VERIFICATION = 1;
+	public static final int IMAGE_AUDIO_VERIFICATION = 2;
+	public static final int TEXT_VERIFICATION = 3;
+	public static final int TEXT_AUDIO_VERIFICATION = 4;
+	public static final int IMAGE_VERIFICATION = 5;
 	private static final int DEFAULT_SCREEN_DURATION = 2000;
 	private static final int[] ATTRIBUTE_HIGHLIGHT_COLOR = new int[]{255,255,0};
 	private static final int[] CORRECT_VERIFICATION_COLOR=new int[]{0,255,0};
