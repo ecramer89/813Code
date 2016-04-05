@@ -90,8 +90,8 @@ public class ProcessingApplication extends PApplet implements Observer {
 		configureGenotype();		
 		//I think do this after we collect the user aptitude.
 		//jgapAdaptor.updatePopulation(JGAPAdapter.ONLY_RANK_BY_TEMPLATES);
-		storeReferenceToCurrentPopulation();
-		configureApplicationForNextIndividual(); //for first individual.
+		/*storeReferenceToCurrentPopulation();
+		configureApplicationForNextIndividual();*/ //for first individual.
 
 
 
@@ -233,6 +233,17 @@ public class ProcessingApplication extends PApplet implements Observer {
 
 		state=DELAY_BEFORE_START;
 		delay_before_start_timer=DELAY_BEFORE_START_TIME;
+		
+        //evolve the first population given the child's level of aptitude
+		//and each of the initial populations distances from the 
+		//templates, times the weighting those templates have for the child's level of aptitude
+		//(i.e., if they're closer to the templates that have negative weightings...
+		//for this child's aptitude
+		//then that will impact fitness negatively
+		jgapAdaptor.updatePopulation(JGAPAdapter.ONLY_RANK_BY_TEMPLATES);
+		storeReferenceToCurrentPopulation();
+		configureApplicationForNextIndividual(); //for first individual.
+
 		
 	  
 	}

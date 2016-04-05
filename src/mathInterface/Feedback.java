@@ -40,14 +40,32 @@ public class Feedback extends Observable implements Observer  {
 	static PImage DEFAULT_INCORRECT_VERIFICATION_IMAGE=null;
 
 
-	private double p_verify=1.0;
+	private static final int BASE_DELAY_INDEX=0;
+	private static final int P_DIRECTIVE_INDEX=1;
 
+	private static final int P_CORRECT_ANSWER_INDEX=2;
+	private static final int CORRECT_ANSWER_DELAY_INDEX=3;
+	private static final int P_ERROR_FLAG_INDEX=4;
+	private static final int ERROR_FLAG_DELAY_INDEX=5;
+	private static final int P_ELABORATE_INDEX=6;
+
+	private static final int P_ATTRIBUTE_ISOLATION_INDEX=7;
+	private static final int ATTRIBUTE_ISOLATION_DELAY_INDEX=8;
+	private static final int P_ALLOW_RESUBMIT_INDEX=9;
+	private static final int VERIFICATION_TYPE_INDEX=10;
+	private static final int VERIFICATION_MODALITY_INDEX=11;
+	
+	private double[] staticFields=new double[12];
+
+
+	
+	
 	/*parameters that are interpreted from the individual (chromosome)*/
 	private int base_feedback_delay;
 
 	/* for directive feedback */
 	private double p_directive=1.0;
-	private int directive_delay;
+	
 
 	private double p_correct_answer=1.0;
 	private int correct_answer_delay;
@@ -58,11 +76,10 @@ public class Feedback extends Observable implements Observer  {
 
 	/* for elaboration */
 	private double p_elaborate=1.0;
-	private int elaboration_delay;
-
+	
 
 	private double p_attribute_isolation=1.0;
-	private int attributeIsolationDuration;
+	
 	private int attributeIsolationDelay;
 
 
@@ -83,10 +100,6 @@ public class Feedback extends Observable implements Observer  {
 
 	private PImage correctVerificationImage;
 	private PImage incorrectVerificationImage;
-	private PImage PLACEHOLDER_IMAGE; 
-
-
-	private int verification_duration=300; //ms
 
 
 	private DisplayScreen verificationScreen;
@@ -100,7 +113,7 @@ public class Feedback extends Observable implements Observer  {
 	private List<DisplayScreen> feedbackScreens;
 	private int numScreensCompleted=PRE_FEEDBACK;
 
-
+	
 
 	private int totalRunTimeOfFeedbackScreens;
 	private int[] id_color=new int[]{255,255,255};
@@ -126,15 +139,17 @@ public class Feedback extends Observable implements Observer  {
 	}
 
 
-
-
 	public void updateAllowingResubmission(double p_allow_resubmission){
 		p_allow_resubmit=p_allow_resubmission;
+		staticFields[P_ALLOW_RESUBMIT_INDEX]=p_allow_resubmit;
 	}
 
-	public void updateDirectiveFeedbackParameters(double p_directive_, int directive_delay_) {
+	public void updateDirectiveFeedbackParameters(double p_directive_) {
 		p_directive=p_directive_;
-		directive_delay=directive_delay_;
+	
+		staticFields[P_DIRECTIVE_INDEX]=p_directive;
+	
+		
 	}
 
 	public void updateProvideCorrectAnswerParameters(double p_correct_answer_, int correct_answer_delay_){
@@ -142,25 +157,33 @@ public class Feedback extends Observable implements Observer  {
 		//provide the correct response
 		p_correct_answer=p_correct_answer_;
 		correct_answer_delay=correct_answer_delay_;
+		staticFields[P_CORRECT_ANSWER_INDEX]=p_correct_answer;
+		staticFields[CORRECT_ANSWER_DELAY_INDEX]=correct_answer_delay_;
 	}
 
 	public void updateErrorFlagParameters(double p_flag_error_, int error_flag_delay_){
 		//highlight the errors in the childs solution
 		p_error_flag=p_flag_error_;
 		error_flag_delay=error_flag_delay_;
+		staticFields[P_ERROR_FLAG_INDEX]=p_error_flag;
+		staticFields[ERROR_FLAG_DELAY_INDEX]=error_flag_delay_;
 
 	}
 
-	public void updateElaborationParameters(double p_elaborate_, int elaborate_delay) {
+	public void updateElaborationParameters(double p_elaborate_) {
 		p_elaborate=p_elaborate_;
-		elaboration_delay=elaborate_delay;
+	
+		staticFields[P_ELABORATE_INDEX]=p_elaborate;
+	
 	}
 
 	public void updateAttributeIsolationParameters(double p_attribute_isolation_, int attribute_isolation_delay){
 
 		//different types of elaborative feedback
 		p_attribute_isolation=p_attribute_isolation_;
-		attributeIsolationDuration=attribute_isolation_delay;
+		attributeIsolationDelay=attribute_isolation_delay;
+		staticFields[P_ATTRIBUTE_ISOLATION_INDEX]=p_attribute_isolation;
+		staticFields[ATTRIBUTE_ISOLATION_DELAY_INDEX]=attribute_isolation_delay;
 	}
 
 
@@ -171,6 +194,8 @@ public class Feedback extends Observable implements Observer  {
 
 		verificationModality=verificationModality_;
 
+		 staticFields[VERIFICATION_TYPE_INDEX]=verificationType;
+		 staticFields[VERIFICATION_MODALITY_INDEX]=verificationModality;
 
 		includeVerificationText=verificationModality==ALL_VERIFICATION||verificationModality==TEXT_IMAGE_VERIFICATION||verificationModality==TEXT_AUDIO_VERIFICATION||verificationModality==TEXT_VERIFICATION;
 		includeVerificationImage=verificationModality==ALL_VERIFICATION||verificationModality==TEXT_IMAGE_VERIFICATION||verificationModality==IMAGE_AUDIO_VERIFICATION||verificationModality==IMAGE_VERIFICATION;
@@ -207,6 +232,7 @@ public class Feedback extends Observable implements Observer  {
 
 	public void updateFeedbackDelay(int feedback_delay_) {
 		base_feedback_delay=feedback_delay_;
+		staticFields[BASE_DELAY_INDEX]=base_feedback_delay;
 	}
 
 
@@ -515,6 +541,14 @@ public class Feedback extends Observable implements Observer  {
 	
 	public int[] getIdColor(){
 		return id_color;
+	}
+
+	public double distanceFrom(Feedback feedback) {
+		double result=0;
+		for(int i=0;i<staticFields.length;i++){
+			result+=Math.pow(staticFields[i]-feedback.staticFields[i], 2);
+		}
+		return Math.sqrt(result);
 	}
 
 

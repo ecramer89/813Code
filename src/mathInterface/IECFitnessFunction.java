@@ -13,15 +13,17 @@ public class IECFitnessFunction extends FitnessFunction {
 
 	@Override
 	protected double evaluate(IChromosome a_subject) {
-		double expectedFitness=FeedbackTemplate.calculateFitnessForChildAptitude(ChromosomeToFeedbackManifester.createFeedback(a_subject));
+		double expectedFitness=FeedbackTemplate.getInstance().calculateFitnessForChildAptitude(ChromosomeToFeedbackManifester.createFeedback(a_subject));
 		
 		
 		double userScore=0;
 		if(incorporateUserRating){
 			userScore= (Double)a_subject.getGene(GenePosition.USER_SCORE.ordinal()).getAllele();
 		}
-		return userScore;
-		//to do... maybe incorporate distance from prototype feedback strategies?
+		
+		
+		return expectedFitness+userScore;
+		
 	}
 
 	public void setIncorporateUserRating(boolean incorporate){

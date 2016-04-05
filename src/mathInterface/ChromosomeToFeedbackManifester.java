@@ -80,7 +80,7 @@ public class ChromosomeToFeedbackManifester  {
 	}
 
 	private static void updateDirectiveFeedbackParameters(Feedback phenotype, IChromosome genotype) {
-		phenotype.updateDirectiveFeedbackParameters(getDoubleAllelle(GenePosition.P_DIRECTIVE, genotype), getIntegerAllelle(GenePosition.DIRECTIVE_DELAY, genotype));
+		phenotype.updateDirectiveFeedbackParameters(getDoubleAllelle(GenePosition.P_DIRECTIVE, genotype));
 		/* types of directive feedback */
 		//provide the correct response
 		phenotype.updateProvideCorrectAnswerParameters(getDoubleAllelle(GenePosition.P_CORRECT_RESPONSE,genotype),getIntegerAllelle(GenePosition.CORRECT_RESPONSE_DELAY, genotype));
@@ -92,15 +92,15 @@ public class ChromosomeToFeedbackManifester  {
 	}
 
 	private static void updateElaborationParameters(Feedback phenotype, IChromosome genotype) {
-		phenotype.updateElaborationParameters(getDoubleAllelle(GenePosition.P_ELABORATE, genotype), getIntegerAllelle(GenePosition.DELAY_UNTIL_ELABORATE, genotype));
+		phenotype.updateElaborationParameters(getDoubleAllelle(GenePosition.P_ELABORATE, genotype));
 
-		phenotype.updateAttributeIsolationParameters(getDoubleAllelle(GenePosition.P_ATTRIBUTE_ISOLATION, genotype), getIntegerAllelle(GenePosition.ATTRIBUTE_ISOLATION_DURATION, curr_genotype));
+		phenotype.updateAttributeIsolationParameters(getDoubleAllelle(GenePosition.P_ATTRIBUTE_ISOLATION, genotype), getIntegerAllelle(GenePosition.ATTRIBUTE_ISOLATION_DURATION, genotype));
 	}
 
 
 	private static void updateVerificationParameters(Feedback phenotype, IChromosome genotype) {
 
-		phenotype.updateVerificationParameters(getIntegerAllelle(GenePosition.VERIFICATION_TYPE, genotype),getIntegerAllelle(GenePosition.VERIFICATION_MODALITY, curr_genotype));
+		phenotype.updateVerificationParameters(getIntegerAllelle(GenePosition.VERIFICATION_TYPE, genotype),getIntegerAllelle(GenePosition.VERIFICATION_MODALITY, genotype));
 	}
 
 
@@ -165,6 +165,7 @@ public class ChromosomeToFeedbackManifester  {
 
 	public static Feedback createFeedback(IChromosome a_subject) {
 		Feedback result=new Feedback();
+		
 		setStaticFeedbackParameters(result,a_subject);
 		return result;
 	}
