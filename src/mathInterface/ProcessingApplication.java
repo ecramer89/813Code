@@ -13,7 +13,7 @@ public class ProcessingApplication extends PApplet implements Observer {
 	private static ProcessingApplication processingAppInstance;
 	public static final int APPLICATION_WIDTH=800;
 	public static final int APPLICATION_HEIGHT=600;
-	public static final int NUM_GENERATIONS=3;
+	public static final int NUM_GENERATIONS=5;
 	public static final int POPULATION_SIZE=3;
 
 	public static ChromosomeToFeedbackManifester feedbackManifester;

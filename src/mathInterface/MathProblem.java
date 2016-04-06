@@ -6,7 +6,7 @@ import processing.core.*;
 
 public class MathProblem {
 
-	
+
 	static final String EQUALS="=";
 	static final String X="X";
 	static final String NEGATION="-";
@@ -17,7 +17,7 @@ public class MathProblem {
 
 	Integer answer=new Integer(0);
 	int numDigitsInAnswer;
-    
+
 	String problemAsString;
 
 
@@ -31,7 +31,7 @@ public class MathProblem {
 
 		createRepresentationOfProblemAsString();
 
-	
+
 	}
 
 
@@ -54,14 +54,38 @@ public class MathProblem {
 	public static MathProblem makeRandomProblem(int min_arg, int max_arg){
 		int arg1, arg2;
 		MathOperator op;
-		
+
 		arg1=makeRandomArgument(min_arg,max_arg);
 		arg2=makeRandomArgument(min_arg, max_arg);
 		op = MathOperator.getRandomOperator();
+        
+		if(divisionByZero(arg1, arg2, op)){
+			op=MathOperator.MULTIPLICATION;
+		}
+		
+		//for the time being, prevent answers that have negatives.
+		if (answerWouldBeNegative(arg1, arg2,op)){
+			int tmp=arg1;
+			arg1=arg2;
+			arg2=tmp;
+		}
 	
+
 		return new MathProblem(op,arg1,arg2);
 	}
 
+
+	private static boolean divisionByZero(int arg1, int arg2, MathOperator op) {
+
+		return arg2==0&&op==MathOperator.DIVISION;
+	}
+
+
+	private static boolean answerWouldBeNegative(int arg1, int arg2,
+			MathOperator op) {
+		return arg1<arg2 && op==MathOperator.SUBTRACTION;
+
+	}
 
 	private static int makeRandomArgument(int min_arg, int max_arg){
 		return (int) (min_arg+Math.random()*(max_arg-min_arg));
@@ -97,15 +121,15 @@ public class MathProblem {
 	public Integer currentAnswer() {
 		return answer;
 	}
-	
-	
+
+
 	/* param significance: power of 10 that corresponds to desired signifance of digit.
 	 *0 = least 
 	 *1= second least...
 	 *2 = third least...
 	 */
 	public int[] getAnswerDigits(){
-	
+
 		int[] digits=new int[numDigitsInAnswer];
 		int answer_quo=answer;
 		for(int i=0;i<numDigitsInAnswer;i++){
@@ -118,15 +142,15 @@ public class MathProblem {
 
 
 	public int[] getSolutionDigits(int numDigits) {
-	
-	    int[] solutionDigits=new int[numDigits];
+
+		int[] solutionDigits=new int[numDigits];
 		int solution_quo=solution;
 		for(int i=0;i<solutionDigits.length;i++){
 			int digit=solution_quo%10;
 			solution_quo/=10;
 			solutionDigits[i]=digit;
 		}
-		
+
 		return solutionDigits;
 	}
 

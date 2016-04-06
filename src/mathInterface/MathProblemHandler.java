@@ -8,7 +8,7 @@ public class MathProblemHandler {
 
 
 	static MathProblemHandler instance;
-	public static final int MATH_PROBLEMS_PER_SET=1;
+	public static final int MATH_PROBLEMS_PER_SET=3;
 	public static final int MAX_ARGUMENT_VALUE=9;
 	public static final int MAX_DIGITS_IN_ANSWER=3;
 
