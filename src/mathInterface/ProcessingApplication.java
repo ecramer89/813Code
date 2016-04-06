@@ -39,8 +39,7 @@ public class ProcessingApplication extends PApplet implements Observer {
 
 
 	private int state;
-	private VariableText populationUpdateTimer=new VariableText(0, UI_FONT_COLOR,0,0,UI_FONT_SIZE);
-	private DisplayScreen populationUpdateScreen;
+	
 	private int generationNumber;
 
 
@@ -71,16 +70,6 @@ public class ProcessingApplication extends PApplet implements Observer {
 		jgapAdaptor=JGAPAdapter.getInstance();
 		mathProblemUI=UI.getInstance();
 		mathProblemHandler=MathProblemHandler.getInstance();
-
-
-		populationUpdateScreen=makeEmptyScreenSizedToApplication();
-		populationUpdateScreen.setDurationOfDisplay(UPDATE_POPULATION_DELAY);
-		populationUpdateScreen.addVariableText(new VariableText("Evolving next generation... please wait.",UI_FONT_COLOR,0,0,20));
-		populationUpdateScreen.newLine();
-		populationUpdateScreen.newLine();
-		populationUpdateScreen.addVariableText(populationUpdateTimer);
-		populationUpdateScreen.setName("populationScreen");
-		populationUpdateScreen.addObserver(this);
 
 
 		allDoneScreen=makeEmptyScreenSizedToApplication();
@@ -184,12 +173,17 @@ public class ProcessingApplication extends PApplet implements Observer {
 			text("Set completed.", width/2, height/2);
 			text("Configuring next problem set... one moment.", width/2, height/2+50);
 			return;
+		case UPDATING_POPULATION:
+			handleTransitionScreen();
+			text("All sets completed.", width/2, height/2);
+			text("Configuring next generation of feedbacks... please wait.", width/2, height/2+50);
+			text(delay_before_start_timer, width/2, height/2+100);
+			return;
 		}
 
+
 		mathProblemUI.update();
-		if(state==UPDATING_POPULATION){
-			updateDisplayablePopulationTimer();
-		}
+
 
 
 
@@ -300,11 +294,6 @@ public class ProcessingApplication extends PApplet implements Observer {
 
 
 
-	private void updateDisplayablePopulationTimer() {
-		populationUpdateTimer.update(populationUpdateTimer.toInt()+1);
-
-	}
-
 	private void configureGenotype(){
 		try {
 			jgapAdaptor.createInitialGenotype();
@@ -408,8 +397,8 @@ public class ProcessingApplication extends PApplet implements Observer {
 					jgapAdaptor.updatePopulation(JGAPAdapter.INCOPORATE_USER_SCORE_INTO_RANKING); 
 					storeReferenceToCurrentPopulation();
 					state=UPDATING_POPULATION;
-					populationUpdateTimer.update(0);
-					mathProblemUI.activateOverlayScreen(populationUpdateScreen);
+					
+				
 					configureApplicationForNextIndividual();
 				}
 				else {
