@@ -214,7 +214,7 @@ public class UI  {
 	public void activateOverlayScreen(DisplayScreen overlay){
 		overlay.activate();
 		this.overlay=overlay;	
-		System.out.println(this.overlay.getName());
+	
 	}
 
 	public void removeOverlayScreen(){

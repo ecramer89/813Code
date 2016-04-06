@@ -14,6 +14,7 @@ import processing.core.PImage;
 
 public class Feedback extends Observable implements Observer  {
 	//verification type int codes
+	
 	static final int EXPLICIT_VERIFICATION=0;
 	static final int IMPLICIT_CORRECT_VERIFICATION=1;
 	static final int IMPLICIT_INCORRECT_VERIFICATION=2;
@@ -135,6 +136,7 @@ public class Feedback extends Observable implements Observer  {
 		
 		correctVerificationImage=DEFAULT_CORRECT_VERIFICATION_IMAGE;
 		incorrectVerificationImage=DEFAULT_INCORRECT_VERIFICATION_IMAGE;
+		
 
 	}
 
@@ -333,9 +335,7 @@ public class Feedback extends Observable implements Observer  {
 
 		decideIfAllowResubmission(problem);
 
-		System.out.println("feedback screens after start "+feedbackScreens.size());
-		for(DisplayScreen screen : feedbackScreens)
-			System.out.println("in the list "+screen.getName());
+
 	}
 
 
@@ -343,7 +343,7 @@ public class Feedback extends Observable implements Observer  {
 		allowing_resubmission=!problem.currentAnswerIsCorrect()&&eventOccurs(p_allow_resubmit);
 		if(allowing_resubmission){
 			allowResubmitScreen.adjustDelayBeforeDisplay(totalRunTimeOfFeedbackScreens);
-			System.out.println("delay before resubmit "+totalRunTimeOfFeedbackScreens);
+			
 			activateScreen(allowResubmitScreen);
 		}
 	}
@@ -356,7 +356,7 @@ public class Feedback extends Observable implements Observer  {
 				if(eventOccurs(p_attribute_isolation)) {
 					activateScreen(attributeIsolationScreen);
 					nothingActivated=false;
-					//System.out.println("attribute isolation");
+				
 
 				}
 

@@ -84,7 +84,7 @@ public class FeedbackTemplate {
 		for(int i=0;i<templates.length;i++){
 			Feedback template=templates[i];
 			double distance=template.distanceFrom(feedback);
-			System.out.println(template);
+			
 			double weighting=lookupWeighting(template,ProcessingApplication.getCurrentChildAptitude());
 		    result+=transferFunction(distance,weighting);
 		}
@@ -93,8 +93,9 @@ public class FeedbackTemplate {
 	}
 
 
+	//flipped logistic function
 	private static double transferFunction(double distance, double weighting) {
-		double result=1/(1+Math.pow(Math.E,-distance));
+		double result=(10/(1+100*Math.pow(Math.E,distance)))/10;
 		result*=weighting;
 		return result;
 	}

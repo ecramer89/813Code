@@ -14,7 +14,7 @@ public class ProcessingApplication extends PApplet implements Observer {
 	public static final int APPLICATION_WIDTH=800;
 	public static final int APPLICATION_HEIGHT=600;
 	public static final int NUM_GENERATIONS=5;
-	public static final int POPULATION_SIZE=3;
+	public static final int POPULATION_SIZE=2;
 
 	public static ChromosomeToFeedbackManifester feedbackManifester;
 	JGAPAdapter jgapAdaptor;
@@ -28,6 +28,7 @@ public class ProcessingApplication extends PApplet implements Observer {
 	public static final int UPDATING_POPULATION=2;
 	private static final int FINISHED_ALL_POPULATIONS = 3;
 	private static final int DELAY_BEFORE_START = 4;
+	private static final int SIGNALING_NEXT_INDIVIDUAL=5;
 
 	public static final int UPDATE_POPULATION_DELAY = 1000;
 	public static final int[] UI_BACKGROUND_COLOR=new int[]{0,0,0};
@@ -74,7 +75,8 @@ public class ProcessingApplication extends PApplet implements Observer {
 
 		populationUpdateScreen=makeEmptyScreenSizedToApplication();
 		populationUpdateScreen.setDurationOfDisplay(UPDATE_POPULATION_DELAY);
-		populationUpdateScreen.addVariableText(new VariableText("Evolving next generation... please wait.",UI_FONT_COLOR,0,0,UI_FONT_SIZE));
+		populationUpdateScreen.addVariableText(new VariableText("Evolving next generation... please wait.",UI_FONT_COLOR,0,0,20));
+		populationUpdateScreen.newLine();
 		populationUpdateScreen.newLine();
 		populationUpdateScreen.addVariableText(populationUpdateTimer);
 		populationUpdateScreen.setName("populationScreen");
@@ -82,16 +84,13 @@ public class ProcessingApplication extends PApplet implements Observer {
 
 
 		allDoneScreen=makeEmptyScreenSizedToApplication();
-		allDoneScreen.addVariableText(new VariableText("All finished.",UI_FONT_COLOR,0,0,UI_FONT_SIZE));
+		allDoneScreen.addVariableText(new VariableText("All finished.",UI_FONT_COLOR,0,0,20));
 
 		initializeRecordAptitudeButtons();
 
 
 		configureGenotype();		
-		//I think do this after we collect the user aptitude.
-		//jgapAdaptor.updatePopulation(JGAPAdapter.ONLY_RANK_BY_TEMPLATES);
-		/*storeReferenceToCurrentPopulation();
-		configureApplicationForNextIndividual();*/ //for first individual.
+
 
 
 
@@ -158,6 +157,17 @@ public class ProcessingApplication extends PApplet implements Observer {
 
 	}
 
+	private void handleTransitionScreen(){
+		delay_before_start_timer--;
+		if(delay_before_start_timer==0){
+			state=RUNNING_INDIVIDUAL;
+			delay_before_start_timer=DELAY_BEFORE_START_TIME;
+		}
+		textSize(20);
+		background(UI_BACKGROUND_COLOR);
+		fill(UI_FONT_COLOR);
+		textAlign(CENTER);
+	}
 
 	public void draw() {
 		switch(state){
@@ -165,16 +175,14 @@ public class ProcessingApplication extends PApplet implements Observer {
 			updateRecordAptitudeUI();
 			return;
 		case DELAY_BEFORE_START:
-			delay_before_start_timer--;
-			textSize(20);
-			background(UI_BACKGROUND_COLOR);
-			fill(UI_FONT_COLOR);
-			textAlign(CENTER);
+			handleTransitionScreen();
 			text("Thanks!", width/2, height/2);
 			text("Configuring first set of feedbacks... one moment.", width/2, height/2+50);
-			if(delay_before_start_timer==0){
-				state=RUNNING_INDIVIDUAL;
-			}
+			return;
+		case SIGNALING_NEXT_INDIVIDUAL:
+			handleTransitionScreen();
+			text("Set completed.", width/2, height/2);
+			text("Configuring next problem set... one moment.", width/2, height/2+50);
 			return;
 		}
 
@@ -186,6 +194,9 @@ public class ProcessingApplication extends PApplet implements Observer {
 
 
 		//for testing
+		fill(255);
+
+		rect(width/2-190, height-80, 380, 80);
 		int[] col=feedbackManifester.currFeedbackColor();
 		fill(col[0],col[1],col[2]);
 		textSize(20);
@@ -233,8 +244,8 @@ public class ProcessingApplication extends PApplet implements Observer {
 
 		state=DELAY_BEFORE_START;
 		delay_before_start_timer=DELAY_BEFORE_START_TIME;
-		
-        //evolve the first population given the child's level of aptitude
+
+		//evolve the first population given the child's level of aptitude
 		//and each of the initial populations distances from the 
 		//templates, times the weighting those templates have for the child's level of aptitude
 		//(i.e., if they're closer to the templates that have negative weightings...
@@ -244,8 +255,8 @@ public class ProcessingApplication extends PApplet implements Observer {
 		storeReferenceToCurrentPopulation();
 		configureApplicationForNextIndividual(); //for first individual.
 
-		
-	  
+
+
 	}
 
 
@@ -374,21 +385,22 @@ public class ProcessingApplication extends PApplet implements Observer {
 	private void resetFeedbackScreens(){
 		feedbackManifester.resetFeedbackScreens();
 	}
-    
-	
-	
-	int times=0;
+
+
+
+
 	public void feedbackDone(){
-		//System.out.println("called feedback done "+(++times));
+
 		if(!mathProblemHandler.currentProblemSetFinished()){
 			setupNextProblemAndUpdateUI();
 			resetFeedbackScreens(); 
 		}
-		else {
+		else {//current problem set finished.
 			if(currentPopulation.hasNext()){
-				//store user score as the individual's fitness
 
+				ChromosomeFactory.recordUserScoreAsFitnessTermForCurrentFeedback(feedbackManifester.getCurrentGenotype(), mathProblemHandler.getResultsForProblemSet());
 				configureApplicationForNextIndividual();
+				state=SIGNALING_NEXT_INDIVIDUAL;
 			}
 			else {
 				generationNumber++;
@@ -407,6 +419,8 @@ public class ProcessingApplication extends PApplet implements Observer {
 			}
 		}
 	}
+
+
 
 
 

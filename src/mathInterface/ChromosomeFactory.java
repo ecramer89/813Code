@@ -44,12 +44,12 @@ public class ChromosomeFactory {
 		Gene correctAnswerDelay = new IntegerGene(conf, 0, MAX_DELAY);
 		Gene pErrorFlagGene = new DoubleGene(conf, .5, 1);
 		Gene errorFlagDelayGene= new IntegerGene(conf, 0, MAX_DELAY);
-		
-	    Gene pAllowResubmitGene = new DoubleGene(conf,.5,1);
-		
-		
-		
-		
+
+		Gene pAllowResubmitGene = new DoubleGene(conf,.5,1);
+
+
+
+
 		Gene[] genes = new Gene[GenePosition.values().length];
 
 		genes[GenePosition.USER_SCORE.ordinal()] = userScoreGene;
@@ -76,14 +76,34 @@ public class ChromosomeFactory {
 		genes[GenePosition.CORRECT_RESPONSE_DELAY.ordinal()]=correctAnswerDelay;
 		genes[GenePosition.P_ERROR_FLAG.ordinal()]=pErrorFlagGene;
 		genes[GenePosition.ERROR_FLAG_DELAY.ordinal()]=errorFlagDelayGene;
-        genes[GenePosition.P_ALLOW_RESUBMIT.ordinal()]=pAllowResubmitGene;
-		
+		genes[GenePosition.P_ALLOW_RESUBMIT.ordinal()]=pAllowResubmitGene;
 
 
 		return genes;
 	}
 
+	public static void recordUserScoreAsFitnessTermForCurrentFeedback(
+			IChromosome currentGenotype, int[] resultsForProblemSet) {
+		double scoreAsFitness=resultsToFitness(resultsForProblemSet);
+		currentGenotype.getGene(GenePosition.USER_SCORE.ordinal()).setAllele(scoreAsFitness);
+	
+	System.out.println("score as fitness "+scoreAsFitness);
+	
+	}
 
+	private static double resultsToFitness(int[] results) {
+		double result=0;
+		for(int i=0;i<results.length;i++){
+			double weight=transferFunction(i);
+			result+=(results[i]*weight);
+		}
+		return result;
+	}
+
+	private static double transferFunction(double problemNumber) {
+		double result=(10/(1+100*Math.pow(Math.E,-problemNumber)))/10;
+		return result;
+	}
 
 
 

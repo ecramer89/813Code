@@ -8,7 +8,7 @@ public class MathProblemHandler {
 
 
 	static MathProblemHandler instance;
-	public static final int MATH_PROBLEMS_PER_SET=3;
+	public static final int MATH_PROBLEMS_PER_SET=2;
 	public static final int MAX_ARGUMENT_VALUE=9;
 	public static final int MAX_DIGITS_IN_ANSWER=3;
 
@@ -17,7 +17,9 @@ public class MathProblemHandler {
 	//the current problem
 	MathProblem currentProblem;
 
-	
+
+
+
 	private MathProblemHandler(){
 		initializeNewProblemSet();
 	}
@@ -39,11 +41,11 @@ public class MathProblemHandler {
 
 
 	public void initializeNewProblemSet() {
-		currentProblemSet=new MathProblemSet();
+		currentProblemSet=new MathProblemSet(MATH_PROBLEMS_PER_SET);
 
 	}
 
-    
+
 	public boolean currentProblemSetFinished(){
 		return !currentProblemSet.hasNext();
 	}
@@ -60,7 +62,7 @@ public class MathProblemHandler {
 
 
 	public void addDigitToAnswer(int int1) {
-		
+
 		if(currentProblem.numDigitsInAnswer()<MAX_DIGITS_IN_ANSWER){
 			currentProblemSet.current().addDigitToAnswer(int1);
 		}
@@ -82,15 +84,18 @@ public class MathProblemHandler {
 	}
 
 	public void updateUserScore() {
-		if(currentProblem().getData().correct){
-			currentProblemSet.incrementNumProblemsAnsweredCorrectly();
-		}
-		
+		boolean correct=currentProblem().getData().correct;
+		currentProblemSet.recordResultForCurrentProblem(correct);
 	}
 
 	public int[] currentAnswerDigits() {
 
 		return currentProblem.getAnswerDigits();
+	}
+
+	public int[] getResultsForProblemSet() {
+		// TODO Auto-generated method stub
+		return currentProblemSet.getResults();
 	}
 
 

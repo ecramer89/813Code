@@ -37,6 +37,10 @@ public class ChromosomeToFeedbackManifester  {
 		processing=(ProcessingApplication) ProcessingApplication.getInstance();
 
 	}
+	
+	public static IChromosome getCurrentGenotype(){
+		return curr_genotype;
+	}
 
 
 	public static ChromosomeToFeedbackManifester getInstance(){
