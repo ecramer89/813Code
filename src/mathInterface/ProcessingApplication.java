@@ -13,13 +13,22 @@ public class ProcessingApplication extends PApplet implements Observer {
 	private static ProcessingApplication processingAppInstance;
 	public static final int APPLICATION_WIDTH=800;
 	public static final int APPLICATION_HEIGHT=600;
-	public static final int NUM_GENERATIONS=5;
-	public static final int POPULATION_SIZE=2;
+
+	//GA params
+	public static final int NUM_GENERATIONS=4;
+	public static final int POPULATION_SIZE=4;
+
+	//math problem params
+	public static final int MATH_PROBLEMS_PER_SET=2;
+	public static final int MAX_ARGUMENT_VALUE = 3;
+	public static final int MAX_DIGITS_IN_ANSWER = 2;
+
 
 	public static ChromosomeToFeedbackManifester feedbackManifester;
 	JGAPAdapter jgapAdaptor;
 	UI mathProblemUI;
-	MathProblemHandler mathProblemHandler;
+	MathProblemSetHandler mathProblemSetHandler;
+	ChildPerformanceMonitor childPerformanceMonitor;
 
 	Iterator<IChromosome> currentPopulation;
 	private static final int DELAY_BEFORE_START_TIME = 120;
@@ -39,7 +48,7 @@ public class ProcessingApplication extends PApplet implements Observer {
 
 
 	private int state;
-	
+
 	private int generationNumber;
 
 
@@ -51,6 +60,7 @@ public class ProcessingApplication extends PApplet implements Observer {
 	public static final int LOW=0;
 	public static final int MED=1;
 	public static final int NUM_APTITUDE_LEVELS=3;
+
 
 	private static int curr_child_aptitude;
 	public static int getCurrentChildAptitude(){
@@ -69,8 +79,8 @@ public class ProcessingApplication extends PApplet implements Observer {
 		feedbackManifester=ChromosomeToFeedbackManifester.getInstance();
 		jgapAdaptor=JGAPAdapter.getInstance();
 		mathProblemUI=UI.getInstance();
-		mathProblemHandler=MathProblemHandler.getInstance();
-
+		mathProblemSetHandler=MathProblemSetHandler.getInstance();
+		childPerformanceMonitor=ChildPerformanceMonitor.getInstance();
 
 		allDoneScreen=makeEmptyScreenSizedToApplication();
 		allDoneScreen.addVariableText(new VariableText("All finished.",UI_FONT_COLOR,0,0,20));
@@ -188,15 +198,19 @@ public class ProcessingApplication extends PApplet implements Observer {
 
 
 		//for testing
-		fill(255);
+		displayCurrentFeedbackInfo();
 
+	}
+
+
+	private void displayCurrentFeedbackInfo(){
+		fill(255);
 		rect(width/2-190, height-80, 380, 80);
 		int[] col=feedbackManifester.currFeedbackColor();
 		fill(col[0],col[1],col[2]);
 		textSize(20);
 		textAlign(CENTER);
 		text(feedbackManifester.currFeedback(), width/2, height-40);
-
 	}
 
 
@@ -245,8 +259,7 @@ public class ProcessingApplication extends PApplet implements Observer {
 		//(i.e., if they're closer to the templates that have negative weightings...
 		//for this child's aptitude
 		//then that will impact fitness negatively
-		jgapAdaptor.updatePopulation(JGAPAdapter.ONLY_RANK_BY_TEMPLATES);
-		storeReferenceToCurrentPopulation();
+		configureApplicationForNextGeneration(JGAPAdapter.ONLY_RANK_BY_TEMPLATES);
 		configureApplicationForNextIndividual(); //for first individual.
 
 
@@ -265,10 +278,10 @@ public class ProcessingApplication extends PApplet implements Observer {
 
 	public void keyPressed(){
 		if (KeyInterpreter.isInt(key)) {
-			mathProblemHandler.addDigitToAnswer(KeyInterpreter.toInt(key));
+			mathProblemSetHandler.addDigitToAnswer(KeyInterpreter.toInt(key));
 		}
 		if (KeyInterpreter.isDelete(key)) {
-			mathProblemHandler.removeDigitFromAnswer();
+			mathProblemSetHandler.removeDigitFromAnswer();
 		}
 
 
@@ -280,7 +293,7 @@ public class ProcessingApplication extends PApplet implements Observer {
 
 
 	private void updateUserAnswerDigits(){
-		int[] userAnswerDigits=mathProblemHandler.currentAnswerDigits();
+		int[] userAnswerDigits=mathProblemSetHandler.currentAnswerDigits();
 
 		int i=0;
 		for(;i<userAnswerDigits.length;i++){
@@ -312,12 +325,16 @@ public class ProcessingApplication extends PApplet implements Observer {
 
 	//you should call this when you are done with the current indiviaul
 	private void configureApplicationForNextIndividual(){
+
 		//get a fresh new set of problems
-		mathProblemHandler.initializeNewProblemSet();
-		mathProblemHandler.createRandomProblems();
+		mathProblemSetHandler.initializeNewProblemSet();
+		mathProblemSetHandler.createRandomProblems();
 		//update feedback variables
 		feedbackManifester.setCurrentFeedbackChromosome(currentPopulation.next());
 		feedbackManifester.initializeFeedbackScreens();
+		//notify the child performance monitor that we are running a new individual
+		//of the current generation.
+		childPerformanceMonitor.prepareForNextIndividual();
 		//setup first problem
 		setupNextProblemAndUpdateUI();	
 	}
@@ -340,9 +357,9 @@ public class ProcessingApplication extends PApplet implements Observer {
 		numAttempts++;
 		if(feedbackManifester.acceptingResponse()){
 			if(isFirstAttemptAtThisProblem()){
-				mathProblemHandler.updateUserScore();
+				mathProblemSetHandler.updateUserScore();
 			}
-			feedbackManifester.provideFeedback(mathProblemHandler.currentProblem());
+			feedbackManifester.provideFeedback(mathProblemSetHandler.currentProblem());
 		}
 	}
 
@@ -356,7 +373,7 @@ public class ProcessingApplication extends PApplet implements Observer {
 		userAnswerDigitsTextObjects[0]=usersAnswerFirstDigit;
 		userAnswerDigitsTextObjects[1]=usersAnswerSecondDigit;
 		userAnswerDigitsTextObjects[2]=usersAnswerThirdDigit;
-		mathProblemHandler.prepareNextProblem();
+		mathProblemSetHandler.prepareNextProblem();
 		mathProblemUI.clearAnswerScreen();
 
 
@@ -364,7 +381,7 @@ public class ProcessingApplication extends PApplet implements Observer {
 			mathProblemUI.getAnswerScreen().addVariableText(userAnswerDigitsTextObjects[i]);
 		}
 
-		mathProblemUI.updateProblemScreen(mathProblemHandler.currentProblem());
+		mathProblemUI.updateProblemScreen(mathProblemSetHandler.currentProblem());
 
 
 
@@ -380,25 +397,29 @@ public class ProcessingApplication extends PApplet implements Observer {
 
 	public void feedbackDone(){
 
-		if(!mathProblemHandler.currentProblemSetFinished()){
+		if(!mathProblemSetHandler.currentProblemSetFinished()){
 			setupNextProblemAndUpdateUI();
 			resetFeedbackScreens(); 
 		}
 		else {//current problem set finished.
 			if(currentPopulation.hasNext()){
 
-				ChromosomeFactory.recordUserScoreAsFitnessTermForCurrentFeedback(feedbackManifester.getCurrentGenotype(), mathProblemHandler.getResultsForProblemSet());
+				ChromosomeFactory.recordUserScoreAsFitnessTermForCurrentFeedback(feedbackManifester.getCurrentGenotype(), mathProblemSetHandler.getResultsForProblemSet());
+				//tell the child performance monitor to record the summary score for the current individual.
+				childPerformanceMonitor.recordSummaryScoreForCurrentIndividual(mathProblemSetHandler.getResultsForProblemSet());
+
 				configureApplicationForNextIndividual();
 				state=SIGNALING_NEXT_INDIVIDUAL;
 			}
 			else {
+				childPerformanceMonitor.recordSummaryDataForCurrentPopulation();
 				generationNumber++;
 				if(generationNumber<NUM_GENERATIONS){
-					jgapAdaptor.updatePopulation(JGAPAdapter.INCOPORATE_USER_SCORE_INTO_RANKING); 
-					storeReferenceToCurrentPopulation();
+					if(generationNumber==NUM_GENERATIONS/2){
+						shakeUpGeneticAlgorithmOnTheBasisOfIntergenerationalChildPerformance();
+					}
+					configureApplicationForNextGeneration(JGAPAdapter.INCOPORATE_USER_SCORE_INTO_RANKING);
 					state=UPDATING_POPULATION;
-					
-				
 					configureApplicationForNextIndividual();
 				}
 				else {
@@ -407,6 +428,24 @@ public class ProcessingApplication extends PApplet implements Observer {
 				}
 			}
 		}
+	}
+
+
+
+	private void shakeUpGeneticAlgorithmOnTheBasisOfIntergenerationalChildPerformance() {
+		IntergenerationalPerformanceTrend currentTrend=childPerformanceMonitor.getCurrentIntergenerationalPerformanceTrend();
+		if(currentTrend==IntergenerationalPerformanceTrend.WORSENED || currentTrend==IntergenerationalPerformanceTrend.STABLE){
+			System.out.println("shake up");
+		}
+
+	}
+
+
+	private void configureApplicationForNextGeneration(boolean incorporateUserScoreIntoFitnessFunction){
+		jgapAdaptor.updatePopulation(incorporateUserScoreIntoFitnessFunction); 
+		storeReferenceToCurrentPopulation();
+
+		childPerformanceMonitor.prepareForNextGeneration();
 	}
 
 
@@ -423,6 +462,12 @@ public class ProcessingApplication extends PApplet implements Observer {
 			}
 		}
 
+	}
+
+
+	public double constrain(double d, double lower, double upper) {
+
+		return Math.min(Math.max(lower,d), upper);
 	}
 
 }

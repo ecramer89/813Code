@@ -7,6 +7,8 @@ import java.util.List;
 public class MathProblemSet {
 
 
+	private static final int VALUE_FOR_CORRECT = 1;
+	private static final int VALUE_FOR_INCORRECT = 0;
 	private int indexOfNext=-1;
 	private List<MathProblem> problems;
 	private int[] user_results;
@@ -31,7 +33,7 @@ public class MathProblemSet {
 
 	public void recordResultForCurrentProblem(boolean correct){
 		if(indexOfNext<user_results.length)
-			user_results[indexOfNext]=(correct? 1:-1);
+			user_results[indexOfNext]=(correct? VALUE_FOR_CORRECT:VALUE_FOR_INCORRECT);
 		else throw new ArrayIndexOutOfBoundsException("index of next exceeds array indices in problem set");
 	}
 

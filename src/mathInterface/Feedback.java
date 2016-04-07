@@ -260,7 +260,7 @@ public class Feedback extends Observable implements Observer  {
 		//figure out which digits don't match the solution
 		//highlight those digits in red.
 		int[] userAnswerDigits=problem.getAnswerDigits();
-		int[] solutionDigits=problem.getSolutionDigits(MathProblemHandler.MAX_DIGITS_IN_ANSWER);
+		int[] solutionDigits=problem.getSolutionDigits(MathProblemSetHandler.MAX_DIGITS_IN_ANSWER);
 
 		int in_solution=0;
 		int in_answer=0;
@@ -280,7 +280,7 @@ public class Feedback extends Observable implements Observer  {
 		}
 
 		//clear out digits that might be saved in the VT objects from previous answer.
-		for(;in_answer<MathProblemHandler.MAX_DIGITS_IN_ANSWER;in_answer++){
+		for(;in_answer<MathProblemSetHandler.MAX_DIGITS_IN_ANSWER;in_answer++){
 			errorFlagScreen.getVariableText(in_answer).update("");	
 		}
 

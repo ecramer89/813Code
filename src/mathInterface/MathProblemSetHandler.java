@@ -4,13 +4,13 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-public class MathProblemHandler {
+public class MathProblemSetHandler {
 
 
-	static MathProblemHandler instance;
-	public static final int MATH_PROBLEMS_PER_SET=2;
-	public static final int MAX_ARGUMENT_VALUE=9;
-	public static final int MAX_DIGITS_IN_ANSWER=3;
+	static MathProblemSetHandler instance;
+	public static final int MATH_PROBLEMS_PER_SET=ProcessingApplication.MATH_PROBLEMS_PER_SET;
+	public static final int MAX_ARGUMENT_VALUE=ProcessingApplication.MAX_ARGUMENT_VALUE;
+	public static final int MAX_DIGITS_IN_ANSWER=ProcessingApplication.MAX_DIGITS_IN_ANSWER;
 
 	static MathProblemSet currentProblemSet;
 
@@ -19,13 +19,12 @@ public class MathProblemHandler {
 
 
 
-
-	private MathProblemHandler(){
+	private MathProblemSetHandler(){
 		initializeNewProblemSet();
 	}
 
-	public static MathProblemHandler getInstance(){
-		if(instance==null) instance=new MathProblemHandler();
+	public static MathProblemSetHandler getInstance(){
+		if(instance==null) instance=new MathProblemSetHandler();
 		return instance;
 	}
 
@@ -42,7 +41,8 @@ public class MathProblemHandler {
 
 	public void initializeNewProblemSet() {
 		currentProblemSet=new MathProblemSet(MATH_PROBLEMS_PER_SET);
-
+		
+	
 	}
 
 
@@ -94,9 +94,16 @@ public class MathProblemHandler {
 	}
 
 	public int[] getResultsForProblemSet() {
-		// TODO Auto-generated method stub
+
 		return currentProblemSet.getResults();
 	}
+
+
+	
+	
+	
+	
+	
 
 
 
