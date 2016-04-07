@@ -13,8 +13,8 @@ import processing.core.PImage;
  * (chromosome) that results from the genetic algorithm */
 
 public class Feedback extends Observable implements Observer  {
+	public static final int DISCOUNT=-1;
 	//verification type int codes
-	
 	static final int EXPLICIT_VERIFICATION=0;
 	static final int IMPLICIT_CORRECT_VERIFICATION=1;
 	static final int IMPLICIT_INCORRECT_VERIFICATION=2;
@@ -55,18 +55,18 @@ public class Feedback extends Observable implements Observer  {
 	private static final int P_ALLOW_RESUBMIT_INDEX=9;
 	private static final int VERIFICATION_TYPE_INDEX=10;
 	private static final int VERIFICATION_MODALITY_INDEX=11;
-	
+
 	private double[] staticFields=new double[12];
 
 
-	
-	
+
+
 	/*parameters that are interpreted from the individual (chromosome)*/
 	private int base_feedback_delay;
 
 	/* for directive feedback */
 	private double p_directive=1.0;
-	
+
 
 	private double p_correct_answer=1.0;
 	private int correct_answer_delay;
@@ -77,10 +77,10 @@ public class Feedback extends Observable implements Observer  {
 
 	/* for elaboration */
 	private double p_elaborate=1.0;
-	
+
 
 	private double p_attribute_isolation=1.0;
-	
+
 	private int attributeIsolationDelay;
 
 
@@ -114,7 +114,7 @@ public class Feedback extends Observable implements Observer  {
 	private List<DisplayScreen> feedbackScreens;
 	private int numScreensCompleted=PRE_FEEDBACK;
 
-	
+
 
 	private int totalRunTimeOfFeedbackScreens;
 	private int[] id_color=new int[]{255,255,255};
@@ -133,10 +133,10 @@ public class Feedback extends Observable implements Observer  {
 		DEFAULT_CORRECT_VERIFICATION_IMAGE=processing.loadImage("C:/Users/root960/Desktop/emily/IAT813/project/applicationData/images/correct.png");
 
 
-		
+
 		correctVerificationImage=DEFAULT_CORRECT_VERIFICATION_IMAGE;
 		incorrectVerificationImage=DEFAULT_INCORRECT_VERIFICATION_IMAGE;
-		
+
 
 	}
 
@@ -148,10 +148,10 @@ public class Feedback extends Observable implements Observer  {
 
 	public void updateDirectiveFeedbackParameters(double p_directive_) {
 		p_directive=p_directive_;
-	
+
 		staticFields[P_DIRECTIVE_INDEX]=p_directive;
-	
-		
+
+
 	}
 
 	public void updateProvideCorrectAnswerParameters(double p_correct_answer_, int correct_answer_delay_){
@@ -174,9 +174,9 @@ public class Feedback extends Observable implements Observer  {
 
 	public void updateElaborationParameters(double p_elaborate_) {
 		p_elaborate=p_elaborate_;
-	
+
 		staticFields[P_ELABORATE_INDEX]=p_elaborate;
-	
+
 	}
 
 	public void updateAttributeIsolationParameters(double p_attribute_isolation_, int attribute_isolation_delay){
@@ -196,8 +196,8 @@ public class Feedback extends Observable implements Observer  {
 
 		verificationModality=verificationModality_;
 
-		 staticFields[VERIFICATION_TYPE_INDEX]=verificationType;
-		 staticFields[VERIFICATION_MODALITY_INDEX]=verificationModality;
+		staticFields[VERIFICATION_TYPE_INDEX]=verificationType;
+		staticFields[VERIFICATION_MODALITY_INDEX]=verificationModality;
 
 		includeVerificationText=verificationModality==ALL_VERIFICATION||verificationModality==TEXT_IMAGE_VERIFICATION||verificationModality==TEXT_AUDIO_VERIFICATION||verificationModality==TEXT_VERIFICATION;
 		includeVerificationImage=verificationModality==ALL_VERIFICATION||verificationModality==TEXT_IMAGE_VERIFICATION||verificationModality==IMAGE_AUDIO_VERIFICATION||verificationModality==IMAGE_VERIFICATION;
@@ -343,7 +343,7 @@ public class Feedback extends Observable implements Observer  {
 		allowing_resubmission=!problem.currentAnswerIsCorrect()&&eventOccurs(p_allow_resubmit);
 		if(allowing_resubmission){
 			allowResubmitScreen.adjustDelayBeforeDisplay(totalRunTimeOfFeedbackScreens);
-			
+
 			activateScreen(allowResubmitScreen);
 		}
 	}
@@ -356,7 +356,7 @@ public class Feedback extends Observable implements Observer  {
 				if(eventOccurs(p_attribute_isolation)) {
 					activateScreen(attributeIsolationScreen);
 					nothingActivated=false;
-				
+
 
 				}
 
@@ -390,8 +390,8 @@ public class Feedback extends Observable implements Observer  {
 	}
 
 	public void activateScreen(DisplayScreen screen){
-        int duration=screen.getDurationOfDisplay();
-        int extraDelay=screen.getDelayBeforeDisplay()-base_feedback_delay;
+		int duration=screen.getDurationOfDisplay();
+		int extraDelay=screen.getDelayBeforeDisplay()-base_feedback_delay;
 		if(duration+extraDelay>totalRunTimeOfFeedbackScreens){
 			totalRunTimeOfFeedbackScreens=duration+extraDelay;
 		}
@@ -538,7 +538,7 @@ public class Feedback extends Observable implements Observer  {
 		id_color[1]=color[1];
 		id_color[2]=color[2];
 	}
-	
+
 	public int[] getIdColor(){
 		return id_color;
 	}
@@ -546,7 +546,11 @@ public class Feedback extends Observable implements Observer  {
 	public double distanceFrom(Feedback feedback) {
 		double result=0;
 		for(int i=0;i<staticFields.length;i++){
-			result+=Math.pow(staticFields[i]-feedback.staticFields[i], 2);
+			double other_field=feedback.staticFields[i];
+			double this_field=staticFields[i];
+			if(!(this_field==DISCOUNT) && !(other_field==DISCOUNT)){
+				result+=Math.pow(this_field-other_field, 2);
+			}
 		}
 		return Math.sqrt(result);
 	}
