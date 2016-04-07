@@ -44,9 +44,6 @@ public class ProcessingApplication extends PApplet implements Observer {
 	public static final int[] UI_FONT_COLOR=new int[]{255,255,255};
 	public static final int UI_FONT_SIZE = 60;
 
-
-
-
 	private int state;
 
 	private int generationNumber;
@@ -60,6 +57,13 @@ public class ProcessingApplication extends PApplet implements Observer {
 	public static final int LOW=0;
 	public static final int MED=1;
 	public static final int NUM_APTITUDE_LEVELS=3;
+
+
+	private static final float NUM_GA_SHAKEUP_STRATEGIES = 3;
+	private GAShakeupStrategy adjustWeights=new AdjustWeights();
+	private GAShakeupStrategy mutants=new SeedPopulationWithTailEndMutants();
+	private GAShakeupStrategy deviateFromTemplates=new RewardDeviationFromTemplates();
+
 
 
 	private static int curr_child_aptitude;
@@ -430,14 +434,27 @@ public class ProcessingApplication extends PApplet implements Observer {
 		}
 	}
 
-
+	private boolean shouldShakeUpGeneticAlgorithm(IntergenerationalPerformanceTrend currentTrend){
+		return currentTrend==IntergenerationalPerformanceTrend.WORSENED || currentTrend==IntergenerationalPerformanceTrend.STABLE;
+	}
 
 	private void shakeUpGeneticAlgorithmOnTheBasisOfIntergenerationalChildPerformance() {
 		IntergenerationalPerformanceTrend currentTrend=childPerformanceMonitor.getCurrentIntergenerationalPerformanceTrend();
-		if(currentTrend==IntergenerationalPerformanceTrend.WORSENED || currentTrend==IntergenerationalPerformanceTrend.STABLE){
-			System.out.println("shake up");
+		if(shouldShakeUpGeneticAlgorithm(currentTrend)){
+			GAShakeupStrategy strategy=pickRandomStrategy(); //only policy I have so far
+			if(strategy.hasUndoneChanges()){
+				strategy.undo();
+			}
+			strategy.shakeUp();
+
 		}
 
+	}
+
+
+	private GAShakeupStrategy pickRandomStrategy() {
+		int rand=(int)random(0, NUM_GA_SHAKEUP_STRATEGIES);
+		return null;
 	}
 
 
