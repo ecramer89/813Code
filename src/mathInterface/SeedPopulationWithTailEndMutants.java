@@ -1,5 +1,8 @@
 package mathInterface;
 
+import org.jgap.Configuration;
+import org.jgap.impl.DefaultConfiguration;
+
 public class SeedPopulationWithTailEndMutants extends GAShakeupStrategy {
    //1. on construction:
 	/* prepare a large population of individuals, using strictly the automated portion of the
@@ -13,8 +16,16 @@ public class SeedPopulationWithTailEndMutants extends GAShakeupStrategy {
 	
 	 */
 	
-
+	JGAPAdapter jgapAdaptor;
 	
+	
+	public SeedPopulationWithTailEndMutants(IECFitnessFunction fitnessFunction) {
+		super(fitnessFunction);
+		//Configuration conf=new DefaultConfiguration();
+		
+		
+	}
+
 	@Override
 	public void shakeUp() {
 		

@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
+import org.jgap.IChromosome;
+
 import processing.core.PImage;
 
 
@@ -57,8 +59,6 @@ public class Feedback extends Observable implements Observer  {
 	private static final int VERIFICATION_MODALITY_INDEX=11;
 
 	private double[] staticFields=new double[12];
-
-
 
 
 	/*parameters that are interpreted from the individual (chromosome)*/
@@ -125,6 +125,7 @@ public class Feedback extends Observable implements Observer  {
 		allowResubmitText=new VariableText(RESUBMIT_MESSAGE,ProcessingApplication.UI_FONT_COLOR,0,0,ProcessingApplication.UI_FONT_SIZE);
 		loadImages();
 		feedbackScreens=new LinkedList<DisplayScreen>();
+		
 	}
 
 	private void loadImages() {

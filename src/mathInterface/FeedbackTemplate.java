@@ -5,6 +5,7 @@ import java.util.Map;
 
 public class FeedbackTemplate {
 
+	
 	static Feedback exploratory=new Feedback();
 	static Feedback directive=new Feedback();
 	static Feedback[] templates=new Feedback[]{exploratory,directive};
@@ -21,7 +22,7 @@ public class FeedbackTemplate {
 	static Feedback[] badFeedbacks=new Feedback[]{preSearch};
 
 
-
+	private static double maxDistanceBetweenFeedbacks;
 	private static FeedbackTemplate instance;
 
 
@@ -30,7 +31,11 @@ public class FeedbackTemplate {
 		initializeTemplates();
 		initializeAptitudeWeightings();
 		initializeMap();
+		cacheMaxDistanceBetweenFeedbackAndOther();
+		
 	}
+
+
 
 
 	private void initializeAptitudeWeightings() {
@@ -63,6 +68,7 @@ public class FeedbackTemplate {
 		exploratory.updateAttributeIsolationParameters(1,2000);
 		exploratory.updateVerificationParameters(1,1000);
 		exploratory.updateFeedbackDelay(1000);
+		
 
 
 		directive.updateAllowingResubmission(1);
@@ -73,7 +79,7 @@ public class FeedbackTemplate {
 		directive.updateAttributeIsolationParameters(0,0);
 		directive.updateVerificationParameters(Feedback.EXPLICIT_VERIFICATION,Feedback.IMAGE_VERIFICATION);
 		directive.updateFeedbackDelay(100);
-
+		
 
 
 		preSearch.updateAllowingResubmission(1);
@@ -84,11 +90,25 @@ public class FeedbackTemplate {
 		preSearch.updateAttributeIsolationParameters(Feedback.DISCOUNT,Feedback.DISCOUNT);
 		preSearch.updateVerificationParameters(Feedback.DISCOUNT,Feedback.DISCOUNT);
 		preSearch.updateFeedbackDelay(Feedback.DISCOUNT);
-
+		
 
 
 
 	}
+
+	private static void cacheMaxDistanceBetweenFeedbackAndOther() {
+		maxDistanceBetweenFeedbacks=0;
+		GenePosition[] genes=GenePosition.values();
+		for(int i=0;i<genes.length;i++){
+			GenePosition gp=genes[i];
+			maxDistanceBetweenFeedbacks+=Math.pow(gp.allelleRange(),2);
+		}
+		maxDistanceBetweenFeedbacks=Math.sqrt(maxDistanceBetweenFeedbacks);
+		System.out.println("Message from FeedbackTemplate");
+		System.out.println("Maximum distance between feedbacks: "+maxDistanceBetweenFeedbacks);
+	}
+
+
 
 
 	public static FeedbackTemplate getInstance(){
@@ -97,9 +117,9 @@ public class FeedbackTemplate {
 		return instance;
 	}
 
+	 //param sign: do you punish distance from good and proximity to bad templates or vice versa?
 	private double calculateFitnessForChildAptitude(
-			Feedback feedback) {
-		// TODO Auto-generated method stub
+			Feedback feedback, int sign) {
 		double result=0;
 
 		for(int i=0;i<templates.length;i++){
@@ -107,29 +127,36 @@ public class FeedbackTemplate {
 			double distance=template.distanceFrom(feedback);
 
 			double weighting=lookupWeighting(template,ProcessingApplication.getCurrentChildAptitude());
-			result+=transferFunction(distance,weighting);
+			result+=transferFunction(distance,weighting, sign);
 		}
-
+		
+		System.out.println("Message from FeedbackTemplate");
+		System.out.println("fitness for proximity to aptitude-appropriate templates: "+result);
+	
 		return result;
 	}
 
 
-	private double calculateFitnessForProximityToBadFeedbacks(Feedback feedback){
-		double result=0;
+	private double calculateFitnessForProximityToBadFeedbacks(Feedback feedback, int sign){
+		double result=(sign>0? 0 : maxDistanceBetweenFeedbacks);
 		for(int i=0;i<badFeedbacks.length;i++){
 			Feedback badFeedback=badFeedbacks[i];
 			double distance=badFeedback.distanceFrom(feedback);
-			result+=distance;
-
+			result+=sign*distance;
 		}
+		System.out.println("Message from FeedbackTemplate");
+		System.out.println("fitness for proximity to bad feedbacks: "+result);
+		
 		
 		return result;
+		
 	}
 
 
-	//flipped logistic function
-	private static double transferFunction(double distance, double weighting) {
-		double result=(10/(1+100*Math.pow(Math.E,distance)));
+	//sign=1 (i.e., "high" values = large distances from "good" templates. want to punish these
+	//sign =-1 (rewards distance from "good" templates)
+	private static double transferFunction(double distance, double weighting, int sign) {
+		double result=(10/(1+100*Math.pow(Math.E,sign*distance)));
 		result*=weighting;
 		return result;
 	}
@@ -148,9 +175,9 @@ public class FeedbackTemplate {
 	//given child aptitude. idea is there isnt a single "good" feedback; it
 	//depends on child aptitude. child aptitude calc. takes distance from each template
 	//into account.
-	public double calculateExpectedFitness(Feedback feedback) {
-		double given_child_aptitude=calculateFitnessForChildAptitude(feedback);
-		double given_proximity_to_bad_feedbacks=calculateFitnessForProximityToBadFeedbacks(feedback);
+	public double calculateExpectedFitness(Feedback feedback, int sign) {
+		double given_child_aptitude=calculateFitnessForChildAptitude(feedback, sign);
+		double given_proximity_to_bad_feedbacks=calculateFitnessForProximityToBadFeedbacks(feedback, sign);
 
 		return given_child_aptitude+given_proximity_to_bad_feedbacks;
 	}

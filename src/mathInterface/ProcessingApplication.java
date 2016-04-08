@@ -3,12 +3,15 @@ import java.util.Iterator;
 import java.util.Observable;
 import java.util.Observer;
 
+
+
 import org.jgap.Chromosome;
 import org.jgap.InvalidConfigurationException;
 
 import processing.core.*;
 
 import org.jgap.IChromosome;
+import org.jgap.impl.DefaultConfiguration;
 public class ProcessingApplication extends PApplet implements Observer {
 	private static ProcessingApplication processingAppInstance;
 	public static final int APPLICATION_WIDTH=800;
@@ -60,9 +63,9 @@ public class ProcessingApplication extends PApplet implements Observer {
 
 
 	private static final float NUM_GA_SHAKEUP_STRATEGIES = 3;
-	private GAShakeupStrategy adjustWeights=new AdjustWeights();
-	private GAShakeupStrategy mutants=new SeedPopulationWithTailEndMutants();
-	private GAShakeupStrategy deviateFromTemplates=new RewardDeviationFromTemplates();
+	private GAShakeupStrategy adjustWeights;
+	private GAShakeupStrategy mutants;
+	private GAShakeupStrategy deviateFromTemplates;
 
 
 
@@ -81,7 +84,7 @@ public class ProcessingApplication extends PApplet implements Observer {
 	public void setup(){
 		processingAppInstance=this;
 		feedbackManifester=ChromosomeToFeedbackManifester.getInstance();
-		jgapAdaptor=JGAPAdapter.getInstance();
+		jgapAdaptor=new JGAPAdapter();
 		mathProblemUI=UI.getInstance();
 		mathProblemSetHandler=MathProblemSetHandler.getInstance();
 		childPerformanceMonitor=ChildPerformanceMonitor.getInstance();
@@ -89,6 +92,12 @@ public class ProcessingApplication extends PApplet implements Observer {
 		allDoneScreen=makeEmptyScreenSizedToApplication();
 		allDoneScreen.addVariableText(new VariableText("All finished.",UI_FONT_COLOR,0,0,20));
 
+		//initialize shakeup strategies
+		adjustWeights=new AdjustWeights(jgapAdaptor.getFitnessFunction());
+		mutants=new SeedPopulationWithTailEndMutants(jgapAdaptor.getFitnessFunction());
+		deviateFromTemplates=new RewardDeviationFromTemplates(jgapAdaptor.getFitnessFunction());
+		
+		
 		initializeRecordAptitudeButtons();
 
 
@@ -313,7 +322,7 @@ public class ProcessingApplication extends PApplet implements Observer {
 
 	private void configureGenotype(){
 		try {
-			jgapAdaptor.createInitialGenotype();
+			jgapAdaptor.createInitialGenotype(POPULATION_SIZE);
 		} catch (InvalidConfigurationException e) {
 			e.printStackTrace();
 		}
@@ -408,7 +417,7 @@ public class ProcessingApplication extends PApplet implements Observer {
 		else {//current problem set finished.
 			if(currentPopulation.hasNext()){
 
-				ChromosomeFactory.recordUserScoreAsFitnessTermForCurrentFeedback(feedbackManifester.getCurrentGenotype(), mathProblemSetHandler.getResultsForProblemSet());
+				FeedbackChromosomeFactory.recordUserScoreAsFitnessTermForCurrentFeedback(feedbackManifester.getCurrentGenotype(), mathProblemSetHandler.getResultsForProblemSet());
 				//tell the child performance monitor to record the summary score for the current individual.
 				childPerformanceMonitor.recordSummaryScoreForCurrentIndividual(mathProblemSetHandler.getResultsForProblemSet());
 
