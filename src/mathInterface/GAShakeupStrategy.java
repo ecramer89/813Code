@@ -2,19 +2,31 @@ package mathInterface;
 
 public abstract class GAShakeupStrategy {
 	
-	IECFitnessFunction fitnessFunction;
+	JGAPAdapter jgapAdaptor;
+	boolean changed;
 	
 	
-	public GAShakeupStrategy(IECFitnessFunction fitnessFunction){
-		this.fitnessFunction=fitnessFunction;
+	public GAShakeupStrategy(JGAPAdapter jgapAdaptor){
+		this.jgapAdaptor=jgapAdaptor;
 	}
 
 	
-	public abstract void shakeUp();
+	public final void shakeUp(){
+		changed=true;
+		applyChange();
+	}
 	
-	public abstract void undo();
+	public final void undo(){
+		changed=false;
+		revertChange();
+	}
+	
+	protected abstract void applyChange();
+	protected abstract void revertChange();
 
-	public abstract boolean hasUndoneChanges();
+	public final boolean hasUndoneChanges(){
+		return changed;
+	}
 
 }
 

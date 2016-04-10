@@ -12,7 +12,7 @@ public class ChildPerformanceMonitor {
 
 	//array that is used to record the summary scores for each individual of the current population.
 	//needs to be refreshed each time we changed the population.
-	double[] summaryScoresForCurrentPopulation=new double[ProcessingApplication.POPULATION_SIZE];
+	double[] summaryScoresForCurrentPopulation=new double[ProcessingApplication.NUM_INDIVIDUALS_TO_SHOW_USER];
 	int index_of_current_individual=-1;
 
 	private ChildPerformanceMonitor(){}
@@ -24,19 +24,20 @@ public class ChildPerformanceMonitor {
 
 	public void prepareForNextIndividual(){
 		index_of_current_individual++;
-		System.out.println("message from child performance monitor: ");
+		/*System.out.println("message from child performance monitor: ");
 		System.out.println("preparing for next individual: ");
 		System.out.println("index of current individual is: "+index_of_current_individual);
+	*/
 	}
 
 
 	public void prepareForNextGeneration(){
 		index_of_current_generation++;
-		summaryScoresForCurrentPopulation=new double[ProcessingApplication.POPULATION_SIZE];
+		summaryScoresForCurrentPopulation=new double[ProcessingApplication.NUM_INDIVIDUALS_TO_SHOW_USER];
 		index_of_current_individual=-1;
-		System.out.println("message from child performance monitor: ");
+		/*System.out.println("message from child performance monitor: ");
 		System.out.println("preparing for next generation: ");
-		System.out.println("index of current generation is: "+index_of_current_generation);
+		System.out.println("index of current generation is: "+index_of_current_generation);*/
 	}
 
 	public void recordSummaryScoreForCurrentIndividual(int[] resultsForCurrentIndividual){

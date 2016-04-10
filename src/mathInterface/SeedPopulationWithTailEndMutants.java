@@ -1,47 +1,43 @@
 package mathInterface;
 
 import org.jgap.Configuration;
+import org.jgap.InvalidConfigurationException;
 import org.jgap.impl.DefaultConfiguration;
+import org.jgap.impl.MutationOperator;
 
 public class SeedPopulationWithTailEndMutants extends GAShakeupStrategy {
-   //1. on construction:
-	/* prepare a large population of individuals, using strictly the automated portion of the
-	 * genetic algorithm.
-	 * when invoked, take the tail end of that population.
-	 * allow for more mutations than the other one does.
-	 * get a reference to the processing app's current population (or the next population, to be provided by the iterator actually-- need to do that)
-	 * and, delete n random chromosomes from that population,
-	 * insert the tail ends in their place.
-	 * remove the tail ends from the stored population (if called again, we can just make use of whatever else we have. we'll create enough individuals that we won't run out for... a long time)
+
+	int mutationRateScale=2;
+	UserChromosomeSelector selector;
+    double mostToLeastFitScale=.3;
 	
-	 */
-	
-	JGAPAdapter jgapAdaptor;
-	
-	
-	public SeedPopulationWithTailEndMutants(IECFitnessFunction fitnessFunction) {
-		super(fitnessFunction);
-		//Configuration conf=new DefaultConfiguration();
-		
-		
+	public SeedPopulationWithTailEndMutants(JGAPAdapter jgapAdaptor) {
+		super(jgapAdaptor);
+        selector=jgapAdaptor.getUserChromosomeSelector();
 	}
+
+
 
 	@Override
-	public void shakeUp() {
+	public void applyChange() {
+		//incease the mutation rate...
+		jgapAdaptor.accelerateMutationRate(mutationRateScale);
+		//...but now... need also to seed the population with the tail end mutants for
+		//one generation.
+		selector.adjustProportionsOfFittestToLeastFit(mostToLeastFitScale);
 		
-
+		
 	}
+
+
 
 	@Override
-	public void undo() {
-		// TODO Auto-generated method stub
-		
+	protected void revertChange() {
+		//decrease the mutation rate 
+		jgapAdaptor.deaccelerateMutationRate(mutationRateScale);
+		selector.adjustProportionsOfFittestToLeastFit(-mostToLeastFitScale);
 	}
 
-	@Override
-	public boolean hasUndoneChanges() {
-		// TODO Auto-generated method stub
-		return false;
-	}
+
 
 }

@@ -104,8 +104,12 @@ public class FeedbackTemplate {
 			maxDistanceBetweenFeedbacks+=Math.pow(gp.allelleRange(),2);
 		}
 		maxDistanceBetweenFeedbacks=Math.sqrt(maxDistanceBetweenFeedbacks);
-		System.out.println("Message from FeedbackTemplate");
+		/*System.out.println("Message from FeedbackTemplate");
 		System.out.println("Maximum distance between feedbacks: "+maxDistanceBetweenFeedbacks);
+	*/
+	
+	
+	
 	}
 
 
@@ -130,9 +134,9 @@ public class FeedbackTemplate {
 			result+=transferFunction(distance,weighting, sign);
 		}
 		
-		System.out.println("Message from FeedbackTemplate");
+		/*System.out.println("Message from FeedbackTemplate");
 		System.out.println("fitness for proximity to aptitude-appropriate templates: "+result);
-	
+	*/
 		return result;
 	}
 
@@ -144,9 +148,9 @@ public class FeedbackTemplate {
 			double distance=badFeedback.distanceFrom(feedback);
 			result+=sign*distance;
 		}
-		System.out.println("Message from FeedbackTemplate");
+		/*System.out.println("Message from FeedbackTemplate");
 		System.out.println("fitness for proximity to bad feedbacks: "+result);
-		
+		*/
 		
 		return result;
 		

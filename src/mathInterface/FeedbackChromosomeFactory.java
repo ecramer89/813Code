@@ -36,7 +36,9 @@ public class FeedbackChromosomeFactory {
 
 		Gene delayGene = new IntegerGene(conf, 0, MAX_DELAY);
 
-		Gene userScoreGene = new DoubleGene(conf, 0, 1.0);
+		Gene userScoreGene = new DoubleGene(conf, Feedback.DISCOUNT, 1.0);
+		//set the allelle of each chromosome's user score gene (by default) to discount value
+		userScoreGene.setAllele(new Double(Feedback.DISCOUNT));
 
 		Gene verificationTypeGene = new IntegerGene(conf,0,NUM_VERIFICATION_TYPES);
 		Gene verificationModalityGene=new IntegerGene(conf,0,NUM_VERIFCATION_MODALITIES);
@@ -98,7 +100,7 @@ public class FeedbackChromosomeFactory {
 		double scoreAsFitness=resultsToFitness(resultsForProblemSet);
 		currentGenotype.getGene(GenePosition.USER_SCORE.ordinal()).setAllele(scoreAsFitness);
 	
-	System.out.println("score as fitness "+scoreAsFitness);
+	     System.out.println("score as fitness "+scoreAsFitness);
 	
 	}
 

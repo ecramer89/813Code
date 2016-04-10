@@ -549,7 +549,8 @@ public class Feedback extends Observable implements Observer  {
 		for(int i=0;i<staticFields.length;i++){
 			double other_field=feedback.staticFields[i];
 			double this_field=staticFields[i];
-			if(!(this_field==DISCOUNT) && !(other_field==DISCOUNT)){
+	
+			if(count(this_field,other_field)){
 				result+=Math.pow(this_field-other_field, 2);
 			}
 		}
@@ -557,7 +558,14 @@ public class Feedback extends Observable implements Observer  {
 	}
 
 
+ private boolean count(double this_field, double other_field){
+	 return !(this_field==DISCOUNT)&& !(other_field==DISCOUNT);
+ }
 
+public static boolean discount(double userScore) {
+	// TODO Auto-generated method stub
+	return userScore<0;
+}
 
 
 

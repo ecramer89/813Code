@@ -5,7 +5,9 @@ import java.util.Observer;
 
 
 
+
 import org.jgap.Chromosome;
+import org.jgap.Configuration;
 import org.jgap.InvalidConfigurationException;
 
 import processing.core.*;
@@ -19,7 +21,8 @@ public class ProcessingApplication extends PApplet implements Observer {
 
 	//GA params
 	public static final int NUM_GENERATIONS=4;
-	public static final int POPULATION_SIZE=4;
+
+	public static final int NUM_INDIVIDUALS_TO_SHOW_USER=6;
 
 	//math problem params
 	public static final int MATH_PROBLEMS_PER_SET=2;
@@ -32,6 +35,8 @@ public class ProcessingApplication extends PApplet implements Observer {
 	UI mathProblemUI;
 	MathProblemSetHandler mathProblemSetHandler;
 	ChildPerformanceMonitor childPerformanceMonitor;
+
+
 
 	Iterator<IChromosome> currentPopulation;
 	private static final int DELAY_BEFORE_START_TIME = 120;
@@ -93,16 +98,12 @@ public class ProcessingApplication extends PApplet implements Observer {
 		allDoneScreen.addVariableText(new VariableText("All finished.",UI_FONT_COLOR,0,0,20));
 
 		//initialize shakeup strategies
-		adjustWeights=new AdjustWeights(jgapAdaptor.getFitnessFunction());
-		mutants=new SeedPopulationWithTailEndMutants(jgapAdaptor.getFitnessFunction());
-		deviateFromTemplates=new RewardDeviationFromTemplates(jgapAdaptor.getFitnessFunction());
-		
-		
+		adjustWeights=new AdjustWeights(jgapAdaptor);
+		mutants=new SeedPopulationWithTailEndMutants(jgapAdaptor);
+		deviateFromTemplates=new RewardDeviationFromTemplates(jgapAdaptor);
+
+
 		initializeRecordAptitudeButtons();
-
-
-		configureGenotype();		
-
 
 
 
@@ -190,6 +191,17 @@ public class ProcessingApplication extends PApplet implements Observer {
 			handleTransitionScreen();
 			text("Thanks!", width/2, height/2);
 			text("Configuring first set of feedbacks... one moment.", width/2, height/2+50);
+			
+			if(wait_one_frame_to_configure==0){
+				configureApplicationForNextGeneration();
+				configureApplicationForNextIndividual(); //for first individual.
+				wait_one_frame_to_configure=-1;
+			}
+			
+			if(wait_one_frame_to_configure>0) {
+				wait_one_frame_to_configure--;
+			}
+			
 			return;
 		case SIGNALING_NEXT_INDIVIDUAL:
 			handleTransitionScreen();
@@ -250,8 +262,6 @@ public class ProcessingApplication extends PApplet implements Observer {
 	}
 
 
-
-
 	Button identifyPressedAptitudeButton(int mouseX, int mouseY) {
 		for(Button button : aptitude_buttons){
 			if (!button.isPressed() && button.wasPressed(mouseX, mouseY)) return button; 
@@ -259,24 +269,15 @@ public class ProcessingApplication extends PApplet implements Observer {
 		return null;
 	}
 
+	int wait_one_frame_to_configure=1;
 	void handlePressedAptitudeButton(Button button){
 		button.flashToIndicatePressed(this);
 		recordButtonIDAsAptitude(button.id);
 
 		state=DELAY_BEFORE_START;
-		delay_before_start_timer=DELAY_BEFORE_START_TIME;
-
-		//evolve the first population given the child's level of aptitude
-		//and each of the initial populations distances from the 
-		//templates, times the weighting those templates have for the child's level of aptitude
-		//(i.e., if they're closer to the templates that have negative weightings...
-		//for this child's aptitude
-		//then that will impact fitness negatively
-		configureApplicationForNextGeneration(JGAPAdapter.ONLY_RANK_BY_TEMPLATES);
-		configureApplicationForNextIndividual(); //for first individual.
-
-
-
+		delay_before_start_timer=(int)(DELAY_BEFORE_START_TIME/2);
+	
+	    
 	}
 
 
@@ -296,9 +297,6 @@ public class ProcessingApplication extends PApplet implements Observer {
 		if (KeyInterpreter.isDelete(key)) {
 			mathProblemSetHandler.removeDigitFromAnswer();
 		}
-
-
-
 		updateUserAnswerDigits();
 
 
@@ -320,17 +318,8 @@ public class ProcessingApplication extends PApplet implements Observer {
 
 
 
-	private void configureGenotype(){
-		try {
-			jgapAdaptor.createInitialGenotype(POPULATION_SIZE);
-		} catch (InvalidConfigurationException e) {
-			e.printStackTrace();
-		}
-	}
 
-
-
-	private void storeReferenceToCurrentPopulation(){
+	private void storeReferenceToCurrentIndividuals(){
 
 		currentPopulation=jgapAdaptor.iterator();
 	}
@@ -431,7 +420,7 @@ public class ProcessingApplication extends PApplet implements Observer {
 					if(generationNumber==NUM_GENERATIONS/2){
 						shakeUpGeneticAlgorithmOnTheBasisOfIntergenerationalChildPerformance();
 					}
-					configureApplicationForNextGeneration(JGAPAdapter.INCOPORATE_USER_SCORE_INTO_RANKING);
+					configureApplicationForNextGeneration();
 					state=UPDATING_POPULATION;
 					configureApplicationForNextIndividual();
 				}
@@ -463,13 +452,22 @@ public class ProcessingApplication extends PApplet implements Observer {
 
 	private GAShakeupStrategy pickRandomStrategy() {
 		int rand=(int)random(0, NUM_GA_SHAKEUP_STRATEGIES);
-		return null;
+		
+		switch(rand){
+		case 0:
+			return adjustWeights;
+		case 1:
+			return mutants;
+		}
+		
+		return deviateFromTemplates;
+
 	}
 
 
-	private void configureApplicationForNextGeneration(boolean incorporateUserScoreIntoFitnessFunction){
-		jgapAdaptor.updatePopulation(incorporateUserScoreIntoFitnessFunction); 
-		storeReferenceToCurrentPopulation();
+	private void configureApplicationForNextGeneration(){
+		jgapAdaptor.evolveNewIndividuals(); 
+		storeReferenceToCurrentIndividuals();
 
 		childPerformanceMonitor.prepareForNextGeneration();
 	}
@@ -491,7 +489,7 @@ public class ProcessingApplication extends PApplet implements Observer {
 	}
 
 
-	public double constrain(double d, double lower, double upper) {
+	public static double constrain(double d, double lower, double upper) {
 
 		return Math.min(Math.max(lower,d), upper);
 	}

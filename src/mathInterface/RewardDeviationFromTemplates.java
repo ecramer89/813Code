@@ -2,30 +2,26 @@ package mathInterface;
 
 public class RewardDeviationFromTemplates extends GAShakeupStrategy {
 
-	boolean changed=false;
 	
-	public RewardDeviationFromTemplates(IECFitnessFunction fitnessFunction) {
-		super(fitnessFunction);
+	public RewardDeviationFromTemplates(JGAPAdapter jgapAdaptor) {
+		super(jgapAdaptor);
 	}
 
-	@Override
-	public void shakeUp() {
-		fitnessFunction.invertSign();
-		changed=true;
 
-	}
 
 	@Override
-	public void undo() {
-		fitnessFunction.invertSign();
-		changed=false;
+	public void applyChange() {
+		jgapAdaptor.getFitnessFunction().invertSign();
 		
 	}
 
+
+
 	@Override
-	public boolean hasUndoneChanges() {
-		// TODO Auto-generated method stub
-		return changed;
+	protected void revertChange() {
+		jgapAdaptor.getFitnessFunction().invertSign();
+		
 	}
 
+	
 }
