@@ -562,10 +562,7 @@ public class Feedback extends Observable implements Observer  {
 	 return !(this_field==DISCOUNT)&& !(other_field==DISCOUNT);
  }
 
-public static boolean discount(double userScore) {
-	// TODO Auto-generated method stub
-	return userScore<0;
-}
+
 
 
 

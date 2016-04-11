@@ -1,6 +1,7 @@
 package mathInterface;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.jgap.Configuration;
@@ -36,29 +37,41 @@ public class UserChromosomeSelector  {
 	
 	
 	public void selectChromosomesToDisplayToUser(int a_howManyToSelect,
-			List<IChromosome> from_pop, Set<IChromosome> to_set){
+			List<IChromosome> from_pop, Map<IChromosome,Double> to_set){
 		
 		int from_tail=(int)(a_howManyToSelect*prop_from_tail);
-		int from_head=(int)(a_howManyToSelect*prop_from_head);
 		
 		if(from_tail==0){
 			from_tail++;
-			from_head--;
+			
 		}
 		
-		/*System.out.println("message from selector: ");
-		System.out.println("from head: "+from_head);
-		System.out.println("from tail: "+from_tail);*/
+		int from_head=a_howManyToSelect-from_tail;
 		
+		
+		System.out.println("message from selector: ");
+		System.out.println("should select: "+a_howManyToSelect);
+		System.out.println("from head: "+from_head);
+		System.out.println("from tail: "+from_tail);
+		
+		
+		//confused- it was in order of fitness before? will i need to sort?
 		int idx=0;
 		for(int i=0;i<from_head;i++){
-			to_set.add(from_pop.get(idx));
+			IChromosome to_Add=from_pop.get(idx);
+			System.out.println("idx: "+idx);
+			System.out.println("adding: "+to_Add);
+			to_set.put(to_Add,(double) 0);
 			idx++;
+			
 		}
 		
 		idx=from_pop.size()-1;
 		for(int j=0; j<from_tail;j++){
-			to_set.add(from_pop.get(idx));
+			IChromosome to_Add=from_pop.get(idx);
+			System.out.println("idx: "+idx);
+			System.out.println("adding: "+to_Add);
+			to_set.put(to_Add,(double) 0);
 			idx--;
 		}
 		

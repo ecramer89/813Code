@@ -46,9 +46,9 @@ public class ChildPerformanceMonitor {
 
 		double score=summarize(resultsForCurrentIndividual);
 		summaryScoresForCurrentPopulation[index_of_current_individual]=score;
-		/*System.out.println("message from child performance monitor: ");
-		System.out.println("recording summary score for current individual: ");
-		System.out.println("summary score for current individual is: "+score);*/
+		System.out.println("message from child performance monitor: ");
+		System.out.println("recording summary score for current individual (index): "+index_of_current_individual);
+		System.out.println("summary score for current individual is: "+score);
 	}
 
 
@@ -69,11 +69,11 @@ public class ChildPerformanceMonitor {
 	public IntergenerationalPerformanceTrend getCurrentIntergenerationalPerformanceTrend(){
 		/*System.out.println("message from child performance monitor: ");
 		System.out.println("you just asked me to calculate the current trend...: ");
-		System.out.println("what I have recorded for each individual so far: ");
-		for(int i=0;i<intergenerationalPerformanceData.length;i++){
-			GenerationPerformanceData d=intergenerationalPerformanceData[i];
-			System.out.println("at index "+ i+" I have recorded: "+d);
-		}*/
+		System.out.println("what I have recorded for each individual so far: ");*/
+		//for(int i=0;i<intergenerationalPerformanceData.length;i++){
+			//GenerationPerformanceData d=intergenerationalPerformanceData[i];
+		//	System.out.println("at index "+ i+" I have recorded: "+d);
+		//}
 		
 		IntergenerationalPerformanceTrend result= IntergenerationalPerformanceTrend.calculateTrend(intergenerationalPerformanceData,index_of_baseline_generation,index_of_current_generation);
 		index_of_baseline_generation=index_of_current_generation;
@@ -85,13 +85,13 @@ public class ChildPerformanceMonitor {
 
 	private double summarize(int[] resultsForIndividual) {
 		double score=0;
-		/*System.out.println("message from child performance monitor: ");
-		System.out.println("the values for each of the individual records: ");
+		//System.out.println("message from child performance monitor: ");
+		//System.out.println("the values for each of the individual records: ");
 		for(int i=0;i<resultsForIndividual.length;i++){
 			double result_for_problem=resultsForIndividual[i];
 			score+=result_for_problem;
-			System.out.println("problem# "+i+": "+result_for_problem);
-		}*/
+			//System.out.println("problem# "+i+": "+result_for_problem);
+		}
 		double result=score/(double)resultsForIndividual.length;
 
 		return result;

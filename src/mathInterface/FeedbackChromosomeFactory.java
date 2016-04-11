@@ -21,6 +21,11 @@ public class FeedbackChromosomeFactory {
 	public static final int NUM_VERIFCATION_MODALITIES=5;
 
 	public static final double MIN_EVENT_PROBABILITY = .5;
+	
+	
+	
+	//for calculating summary user score
+	private static double maximum_weighed_user_score=-1;
 
 
 	
@@ -35,10 +40,6 @@ public class FeedbackChromosomeFactory {
 		Gene textBGene= new IntegerGene(conf, 0, 255);
 
 		Gene delayGene = new IntegerGene(conf, 0, MAX_DELAY);
-
-		Gene userScoreGene = new DoubleGene(conf, Feedback.DISCOUNT, 1.0);
-		//set the allelle of each chromosome's user score gene (by default) to discount value
-		userScoreGene.setAllele(new Double(Feedback.DISCOUNT));
 
 		Gene verificationTypeGene = new IntegerGene(conf,0,NUM_VERIFICATION_TYPES);
 		Gene verificationModalityGene=new IntegerGene(conf,0,NUM_VERIFCATION_MODALITIES);
@@ -64,9 +65,6 @@ public class FeedbackChromosomeFactory {
 
 
 		Gene[] genes = new Gene[GenePosition.values().length];
-
-		genes[GenePosition.USER_SCORE.ordinal()] = userScoreGene;
-
 
 		genes[GenePosition.FEEDBACK_DELAY.ordinal()] = delayGene;
 		genes[GenePosition.TEXT_COLOR_R.ordinal()]=textRGene;
@@ -97,10 +95,23 @@ public class FeedbackChromosomeFactory {
 
 	public static void recordUserScoreAsFitnessTermForCurrentFeedback(
 			IChromosome currentGenotype, int[] resultsForProblemSet) {
+		
+		if(maximum_weighed_user_score==-1){
+			int[] topScore=new int[resultsForProblemSet.length];
+			for(int i=0;i<topScore.length;i++){
+				topScore[i]=1;
+			}
+			maximum_weighed_user_score=resultsToFitness(topScore);
+			System.out.println("message from FeedbackChromosome Factory: ");
+			System.out.println("max weighted score: "+maximum_weighed_user_score);
+		}
 		double scoreAsFitness=resultsToFitness(resultsForProblemSet);
-		currentGenotype.getGene(GenePosition.USER_SCORE.ordinal()).setAllele(scoreAsFitness);
-	
-	     System.out.println("score as fitness "+scoreAsFitness);
+	    scoreAsFitness/=maximum_weighed_user_score;
+		
+		//System.out.println("message from FeedbackChromosome Factory: ");
+		//System.out.println("recording user score as fitness: "+scoreAsFitness);
+		
+		JGAPAdapter.getInstance().setUserScoreFor(currentGenotype, scoreAsFitness);
 	
 	}
 
@@ -115,6 +126,9 @@ public class FeedbackChromosomeFactory {
 
 	private static double transferFunction(double problemNumber) {
 		double result=(10/(1+100*Math.pow(Math.E,-problemNumber)))/10;
+		//System.out.println("message from feedback chromosome factory: ");
+		//System.out.println("weight for this problem: "+result);
+		
 		return result;
 	}
 	

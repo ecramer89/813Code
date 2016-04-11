@@ -64,6 +64,7 @@ public class GenerationPerformanceData {
 
 		System.out.println("---message from GenerationPerformanceData---");
 		System.out.println("summary data for the current generation: ");
+		System.out.println("n: "+rawScores.length);
 		System.out.println("averageScore: "+averageScore);
 		System.out.println("highScore: "+highScore);
 		System.out.println("lowScore: "+lowScore);

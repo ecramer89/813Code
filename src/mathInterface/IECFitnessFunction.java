@@ -16,6 +16,10 @@ public class IECFitnessFunction extends FitnessFunction {
 
 	private int sign=1;
 	//boolean done_testing=false;
+	
+
+	
+	
 	@Override
 	protected double evaluate(IChromosome a_subject) {
 		double expec_weight=default_expected_fitness_weight;
@@ -23,17 +27,18 @@ public class IECFitnessFunction extends FitnessFunction {
 
 
 		double expectedFitness=FeedbackTemplate.getInstance().calculateExpectedFitness(ChromosomeToFeedbackManifester.createFeedback(a_subject), sign);
-		double userScore= (Double)a_subject.getGene(GenePosition.USER_SCORE.ordinal()).getAllele();
+		double userScore=0;//= (Double)a_subject.getGene(GenePosition.USER_SCORE.ordinal()).getAllele();
 
 
 		//just use the automated part of the fitness function if the individual lacks a user rating.
-		if(Feedback.discount(userScore)){
-			expec_weight=1.0;
-			user_score_weight=0;
-
+		if(JGAPAdapter.getInstance().wasSelectedForPresentationToUser(a_subject)){
+		 	userScore=JGAPAdapter.getInstance().getUserScoreFor(a_subject);
+		 	System.out.println("message from fitness function: ");
+			System.out.println("got user score from the jgap adaptor: "+userScore);
 		}
 		else {
-			System.out.println("someone has a non negative user score...");
+			expec_weight=1.0;
+			user_score_weight=0;
 		}
 
 
@@ -45,7 +50,8 @@ public class IECFitnessFunction extends FitnessFunction {
 		double weighted_exp_fitness=expec_weight*expectedFitness;
 		double scaled_user_score=userScore*FeedbackTemplate.getMaximumExpectedFitness();
 		double weighted_user_score_fitness=user_score_weight*scaled_user_score;
-
+		//System.out.println("weighted user score: "+weighted_user_score_fitness);
+		//System.out.println("weighted expec fitness: "+weighted_exp_fitness);
 		return weighted_exp_fitness+weighted_user_score_fitness;
 
 	}
@@ -70,13 +76,7 @@ public class IECFitnessFunction extends FitnessFunction {
 	}
 
 
-
-
-
-
-	public static void setUserScore(IChromosome a_subject, double score){
-		a_subject.getGene(GenePosition.USER_SCORE.ordinal()).setAllele(score);	
-	}
+	
 
 
 

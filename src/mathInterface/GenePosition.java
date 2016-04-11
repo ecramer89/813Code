@@ -2,7 +2,7 @@ package mathInterface;
 
 public enum GenePosition {
 
-	USER_SCORE(0,1),
+	//USER_SCORE(0,1),
 	FEEDBACK_DELAY(0,FeedbackChromosomeFactory.MAX_DELAY),
 	TEXT_COLOR_R(0, 255),
 	TEXT_COLOR_G(0, 255),

@@ -1,8 +1,10 @@
 package mathInterface;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.jgap.Chromosome;
@@ -30,7 +32,7 @@ public class JGAPAdapter implements Iterable<IChromosome> {
 	public static final int DEFAULT_MUTATION_RATE=6;
 	public static final boolean ONLY_RANK_BY_TEMPLATES = false;
 	public static final boolean INCOPORATE_USER_SCORE_INTO_RANKING = true;
-	public static final int POPULATION_SIZE = 80;
+	public static final int POPULATION_SIZE = 20;
 
 
 	public static final double DEFAULT_PROPORTION_SELECT_FROM_FITTEST=.8;
@@ -40,10 +42,11 @@ public class JGAPAdapter implements Iterable<IChromosome> {
 	private IECFitnessFunction fitnessFunction;
 	private MutationOperator mutationOperator;
 
-	UserChromosomeSelector selector;
-	private Set<IChromosome> selectedForPresenationToUser=new HashSet<IChromosome>();;
+	private UserChromosomeSelector selector;
+	private Map<IChromosome,Double> selectedForPresenationToUser=new HashMap<IChromosome, Double>();
+	private static JGAPAdapter theInstance;
 
-	public JGAPAdapter(){
+	private JGAPAdapter(){
 		selector=new UserChromosomeSelector(DEFAULT_PROPORTION_SELECT_FROM_FITTEST);
 		conf=new DefaultConfiguration();
 		fitnessFunction=new IECFitnessFunction();
@@ -58,8 +61,11 @@ public class JGAPAdapter implements Iterable<IChromosome> {
 
 
 	}
-
-
+	
+	public static JGAPAdapter getInstance(){
+		if(theInstance==null) theInstance=new JGAPAdapter();
+		return theInstance;
+	}
 
 
 	private void configureGenotype() throws InvalidConfigurationException {
@@ -109,38 +115,38 @@ public class JGAPAdapter implements Iterable<IChromosome> {
 	 * presentation to the user. */
 	public Iterator<IChromosome> iterator() {
 
-		return selectedForPresenationToUser.iterator();
+		return selectedForPresenationToUser.keySet().iterator();
 	}
 
 	public void evolveNewIndividuals() {
-		setUserRatingOfUnusedIndividualsToDiscount();
+
 		genotype.evolve();
 		selectIndividualsForPresentationToUser();
 	}
 
 	private void selectIndividualsForPresentationToUser() {
-		selectedForPresenationToUser=new HashSet<IChromosome>();
+		selectedForPresenationToUser=new HashMap<IChromosome,Double>();
 		selector.selectChromosomesToDisplayToUser(ProcessingApplication.NUM_INDIVIDUALS_TO_SHOW_USER_PER_GENERATION, genotype.getPopulation().getChromosomes(), selectedForPresenationToUser);
 
-		List<IChromosome> l=genotype.getPopulation().getChromosomes();
-
+		System.out.println("number of chromo selected "+selectedForPresenationToUser.size());
 	}
 
 
-
-	private void setUserRatingOfUnusedIndividualsToDiscount() {
-		for(IChromosome ch : this){
-			if(!selectedForPresenationToUser.contains(ch)){
-				ch.getGene(GenePosition.USER_SCORE.ordinal()).setAllele(new Double(Feedback.DISCOUNT));
-			}
-		}
-
+	public double getUserScoreFor(IChromosome a_subject){
+		return selectedForPresenationToUser.get(a_subject);
 	}
+	
+	
+	public void setUserScoreFor(IChromosome a_subject, double userScore){
+		
+		
+		selectedForPresenationToUser.put(a_subject, userScore);
 
-
-	public IChromosome getFittest() {
-
-		return genotype.getFittestChromosome();
+		
+	}
+	
+	public boolean wasSelectedForPresentationToUser(IChromosome a_subject){
+		return selectedForPresenationToUser.containsKey(a_subject);
 	}
 
 

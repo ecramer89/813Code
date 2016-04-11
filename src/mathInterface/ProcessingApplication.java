@@ -96,7 +96,7 @@ public class ProcessingApplication extends PApplet implements Observer {
 	public void setup(){
 		processingAppInstance=this;
 		feedbackManifester=ChromosomeToFeedbackManifester.getInstance();
-		jgapAdaptor=new JGAPAdapter();
+		jgapAdaptor=JGAPAdapter.getInstance();
 		mathProblemUI=UI.getInstance();
 		mathProblemSetHandler=MathProblemSetHandler.getInstance();
 		childPerformanceMonitor=ChildPerformanceMonitor.getInstance();
@@ -258,10 +258,6 @@ public class ProcessingApplication extends PApplet implements Observer {
 			if(pressed!=null){
 				handlePressedAptitudeButton(pressed);
 			}
-
-
-
-
 		}
 		else {
 			/* if we clicked in the submit answer button, then delegate control to the feedback message */
@@ -330,6 +326,7 @@ public class ProcessingApplication extends PApplet implements Observer {
 	private void storeReferenceToCurrentIndividuals(){
 
 		currentPopulation=jgapAdaptor.iterator();
+		
 	}
 
 
@@ -414,12 +411,12 @@ public class ProcessingApplication extends PApplet implements Observer {
 			resetFeedbackScreens(); 
 		}
 		else {//current problem set finished.
+
+			FeedbackChromosomeFactory.recordUserScoreAsFitnessTermForCurrentFeedback(feedbackManifester.getCurrentGenotype(), mathProblemSetHandler.getResultsForProblemSet());
+			//tell the child performance monitor to record the summary score for the current individual.
+			childPerformanceMonitor.recordSummaryScoreForCurrentIndividual(mathProblemSetHandler.getResultsForProblemSet());
+
 			if(currentPopulation.hasNext()){
-
-				FeedbackChromosomeFactory.recordUserScoreAsFitnessTermForCurrentFeedback(feedbackManifester.getCurrentGenotype(), mathProblemSetHandler.getResultsForProblemSet());
-				//tell the child performance monitor to record the summary score for the current individual.
-				childPerformanceMonitor.recordSummaryScoreForCurrentIndividual(mathProblemSetHandler.getResultsForProblemSet());
-
 				configureApplicationForNextIndividual();
 				state=SIGNALING_NEXT_INDIVIDUAL;
 			}
