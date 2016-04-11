@@ -76,7 +76,7 @@ public class JGAPAdapter implements Iterable<IChromosome> {
 	private void initializeConfiguration() throws InvalidConfigurationException {
 		mutationOperator = (MutationOperator)conf.getGeneticOperators().get(1);
 		mutationOperator.setMutationRate(DEFAULT_MUTATION_RATE);
-
+ 
 		conf.setFitnessFunction(fitnessFunction);
 		conf.setPreservFittestIndividual(true);
 		Gene[] genes=FeedbackChromosomeFactory.getSampleGenes(conf);
@@ -120,7 +120,7 @@ public class JGAPAdapter implements Iterable<IChromosome> {
 
 	private void selectIndividualsForPresentationToUser() {
 		selectedForPresenationToUser=new HashSet<IChromosome>();
-		selector.selectChromosomesToDisplayToUser(ProcessingApplication.NUM_INDIVIDUALS_TO_SHOW_USER, genotype.getPopulation().getChromosomes(), selectedForPresenationToUser);
+		selector.selectChromosomesToDisplayToUser(ProcessingApplication.NUM_INDIVIDUALS_TO_SHOW_USER_PER_GENERATION, genotype.getPopulation().getChromosomes(), selectedForPresenationToUser);
 
 		List<IChromosome> l=genotype.getPopulation().getChromosomes();
 

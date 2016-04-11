@@ -1,7 +1,11 @@
 package mathInterface;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
+
+
 
 
 
@@ -15,19 +19,26 @@ import processing.core.*;
 import org.jgap.IChromosome;
 import org.jgap.impl.DefaultConfiguration;
 public class ProcessingApplication extends PApplet implements Observer {
+
+
+
+	private boolean testing_shakeup=true;;
+
+
+
 	private static ProcessingApplication processingAppInstance;
 	public static final int APPLICATION_WIDTH=800;
 	public static final int APPLICATION_HEIGHT=600;
 
 	//GA params
-	public static final int NUM_GENERATIONS=4;
-
-	public static final int NUM_INDIVIDUALS_TO_SHOW_USER=6;
+	public static final int GA_SHAKEUP_PERIOD=2;
+	public static final int NUM_GENERATIONS=8;
+	public static final int NUM_INDIVIDUALS_TO_SHOW_USER_PER_GENERATION=4;
 
 	//math problem params
-	public static final int MATH_PROBLEMS_PER_SET=2;
-	public static final int MAX_ARGUMENT_VALUE = 3;
-	public static final int MAX_DIGITS_IN_ANSWER = 2;
+	public static final int MATH_PROBLEMS_PER_SET=4;
+	public static final int MAX_ARGUMENT_VALUE = 9;
+	public static final int MAX_DIGITS_IN_ANSWER =  2;
 
 
 	public static ChromosomeToFeedbackManifester feedbackManifester;
@@ -67,11 +78,7 @@ public class ProcessingApplication extends PApplet implements Observer {
 	public static final int NUM_APTITUDE_LEVELS=3;
 
 
-	private static final float NUM_GA_SHAKEUP_STRATEGIES = 3;
-	private GAShakeupStrategy adjustWeights;
-	private GAShakeupStrategy mutants;
-	private GAShakeupStrategy deviateFromTemplates;
-
+	private List<GAShakeupStrategy> shakeupStrategies=new ArrayList<GAShakeupStrategy>();
 
 
 	private static int curr_child_aptitude;
@@ -98,9 +105,10 @@ public class ProcessingApplication extends PApplet implements Observer {
 		allDoneScreen.addVariableText(new VariableText("All finished.",UI_FONT_COLOR,0,0,20));
 
 		//initialize shakeup strategies
-		adjustWeights=new AdjustWeights(jgapAdaptor);
-		mutants=new SeedPopulationWithTailEndMutants(jgapAdaptor);
-		deviateFromTemplates=new RewardDeviationFromTemplates(jgapAdaptor);
+		shakeupStrategies.add(new AdjustWeights(jgapAdaptor));
+		shakeupStrategies.add(new SeedPopulationWithTailEnd(jgapAdaptor));
+		shakeupStrategies.add(new RewardDeviationFromTemplates(jgapAdaptor));
+		shakeupStrategies.add(new IncreaseMutationRate(jgapAdaptor));
 
 
 		initializeRecordAptitudeButtons();
@@ -191,17 +199,17 @@ public class ProcessingApplication extends PApplet implements Observer {
 			handleTransitionScreen();
 			text("Thanks!", width/2, height/2);
 			text("Configuring first set of feedbacks... one moment.", width/2, height/2+50);
-			
+
 			if(wait_one_frame_to_configure==0){
 				configureApplicationForNextGeneration();
 				configureApplicationForNextIndividual(); //for first individual.
 				wait_one_frame_to_configure=-1;
 			}
-			
+
 			if(wait_one_frame_to_configure>0) {
 				wait_one_frame_to_configure--;
 			}
-			
+
 			return;
 		case SIGNALING_NEXT_INDIVIDUAL:
 			handleTransitionScreen();
@@ -276,8 +284,8 @@ public class ProcessingApplication extends PApplet implements Observer {
 
 		state=DELAY_BEFORE_START;
 		delay_before_start_timer=(int)(DELAY_BEFORE_START_TIME/2);
-	
-	    
+
+
 	}
 
 
@@ -367,6 +375,8 @@ public class ProcessingApplication extends PApplet implements Observer {
 
 
 	private VariableText[] userAnswerDigitsTextObjects=new VariableText[3];
+
+
 	private void setupNextProblemAndUpdateUI(){
 		numAttempts=0;
 		VariableText usersAnswerFirstDigit=new VariableText("x",UI_FONT_COLOR,-UI_FONT_SIZE/2-UI_FONT_SIZE/4,0,UI_FONT_SIZE);
@@ -417,7 +427,7 @@ public class ProcessingApplication extends PApplet implements Observer {
 				childPerformanceMonitor.recordSummaryDataForCurrentPopulation();
 				generationNumber++;
 				if(generationNumber<NUM_GENERATIONS){
-					if(generationNumber==NUM_GENERATIONS/2){
+					if(generationNumber%GA_SHAKEUP_PERIOD==0){
 						shakeUpGeneticAlgorithmOnTheBasisOfIntergenerationalChildPerformance();
 					}
 					configureApplicationForNextGeneration();
@@ -439,11 +449,15 @@ public class ProcessingApplication extends PApplet implements Observer {
 	private void shakeUpGeneticAlgorithmOnTheBasisOfIntergenerationalChildPerformance() {
 		IntergenerationalPerformanceTrend currentTrend=childPerformanceMonitor.getCurrentIntergenerationalPerformanceTrend();
 		if(shouldShakeUpGeneticAlgorithm(currentTrend)){
+
+
 			GAShakeupStrategy strategy=pickRandomStrategy(); //only policy I have so far
+
 			if(strategy.hasUndoneChanges()){
 				strategy.undo();
 			}
-			strategy.shakeUp();
+			else strategy.shakeUp();
+
 
 		}
 
@@ -451,16 +465,8 @@ public class ProcessingApplication extends PApplet implements Observer {
 
 
 	private GAShakeupStrategy pickRandomStrategy() {
-		int rand=(int)random(0, NUM_GA_SHAKEUP_STRATEGIES);
-		
-		switch(rand){
-		case 0:
-			return adjustWeights;
-		case 1:
-			return mutants;
-		}
-		
-		return deviateFromTemplates;
+		int rand_idx=(int)random(0, shakeupStrategies.size());
+		return shakeupStrategies.get(rand_idx);
 
 	}
 
@@ -468,7 +474,6 @@ public class ProcessingApplication extends PApplet implements Observer {
 	private void configureApplicationForNextGeneration(){
 		jgapAdaptor.evolveNewIndividuals(); 
 		storeReferenceToCurrentIndividuals();
-
 		childPerformanceMonitor.prepareForNextGeneration();
 	}
 

@@ -24,7 +24,7 @@ public class FeedbackTemplate {
 
 	private static double maxDistanceBetweenFeedbacks;
 	private static FeedbackTemplate instance;
-
+    private static double max_exp_fitness;
 
 
 	private FeedbackTemplate(){
@@ -32,9 +32,22 @@ public class FeedbackTemplate {
 		initializeAptitudeWeightings();
 		initializeMap();
 		cacheMaxDistanceBetweenFeedbackAndOther();
+		cacheMaximumExpectedFitness();
 		
 	}
 
+	
+	private static void cacheMaximumExpectedFitness(){
+		//actually an overestimate because you could not be equidistant (as far as possible) from every template at the same time,
+		//but that is okay.
+		double max_exp_prox_to_bad=maxDistanceBetweenFeedbacks*badFeedbacks.length;
+		double max_exp_distance_from_good=transferFunction(0,1,1)*templates.length;
+		max_exp_fitness=max_exp_prox_to_bad+max_exp_distance_from_good;
+	}
+	
+	public static double getMaximumExpectedFitness(){
+		return max_exp_fitness;
+	}
 
 
 
