@@ -24,6 +24,8 @@ import processing.core.PImage;
  *  
  */
 public class ChromosomeToFeedbackManifester  {
+	public static PImage DEFAULT_CORRECT_VERIFICATION_IMAGE=null;
+	public static PImage DEFAULT_INCORRECT_VERIFICATION_IMAGE=null;
 	static ProcessingApplication processing;
 	static ChromosomeToFeedbackManifester theInstance;
 	private static IChromosome curr_genotype;
@@ -35,7 +37,13 @@ public class ChromosomeToFeedbackManifester  {
 
 	private ChromosomeToFeedbackManifester(){
 		processing=(ProcessingApplication) ProcessingApplication.getInstance();
-
+		loadImages();
+	}
+	
+	private void loadImages() {
+		ProcessingApplication processing=ProcessingApplication.getInstance();
+		DEFAULT_INCORRECT_VERIFICATION_IMAGE=processing.loadImage("C:/Users/root960/Desktop/emily/IAT813/project/applicationData/images/incorrect.png");
+		DEFAULT_CORRECT_VERIFICATION_IMAGE=processing.loadImage("C:/Users/root960/Desktop/emily/IAT813/project/applicationData/images/correct.png");
 	}
 	
 	public static IChromosome getCurrentGenotype(){

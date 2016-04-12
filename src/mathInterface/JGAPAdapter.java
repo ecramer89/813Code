@@ -32,7 +32,7 @@ public class JGAPAdapter implements Iterable<IChromosome> {
 	public static final int DEFAULT_MUTATION_RATE=6;
 	public static final boolean ONLY_RANK_BY_TEMPLATES = false;
 	public static final boolean INCOPORATE_USER_SCORE_INTO_RANKING = true;
-	public static final int POPULATION_SIZE = 20;
+	public static final int POPULATION_SIZE = ProcessingApplication.POPULATION_SIZE;
 
 
 	public static final double DEFAULT_PROPORTION_SELECT_FROM_FITTEST=.8;
@@ -61,7 +61,7 @@ public class JGAPAdapter implements Iterable<IChromosome> {
 
 
 	}
-	
+
 	public static JGAPAdapter getInstance(){
 		if(theInstance==null) theInstance=new JGAPAdapter();
 		return theInstance;
@@ -82,7 +82,7 @@ public class JGAPAdapter implements Iterable<IChromosome> {
 	private void initializeConfiguration() throws InvalidConfigurationException {
 		mutationOperator = (MutationOperator)conf.getGeneticOperators().get(1);
 		mutationOperator.setMutationRate(DEFAULT_MUTATION_RATE);
- 
+
 		conf.setFitnessFunction(fitnessFunction);
 		conf.setPreservFittestIndividual(true);
 		Gene[] genes=FeedbackChromosomeFactory.getSampleGenes(conf);
@@ -118,6 +118,34 @@ public class JGAPAdapter implements Iterable<IChromosome> {
 		return selectedForPresenationToUser.keySet().iterator();
 	}
 
+
+
+
+	public void replaceActivePopulation(Population newPopulation){
+		Population active=genotype.getPopulation();
+
+
+		if(ProcessingApplication.PRINT_DEBUG_MESSAGES){
+			System.out.println("message from adaptor: ");
+			System.out.println("replacing active population: ");
+		}
+
+		active.clear();
+		for(int i=0;i<newPopulation.size();i++){
+			active.addChromosome(newPopulation.getChromosome(i));
+		}
+
+
+
+		if(ProcessingApplication.PRINT_DEBUG_MESSAGES){
+			System.out.println("new population: ");
+			for(int i=0;i<active.size();i++){
+				System.out.println(active.getChromosome(i).toString());
+			}
+		}
+
+	}
+
 	public void evolveNewIndividuals() {
 
 		genotype.evolve();
@@ -128,23 +156,26 @@ public class JGAPAdapter implements Iterable<IChromosome> {
 		selectedForPresenationToUser=new HashMap<IChromosome,Double>();
 		selector.selectChromosomesToDisplayToUser(ProcessingApplication.NUM_INDIVIDUALS_TO_SHOW_USER_PER_GENERATION, genotype.getPopulation().getChromosomes(), selectedForPresenationToUser);
 
-		System.out.println("number of chromo selected "+selectedForPresenationToUser.size());
+
+		if(ProcessingApplication.PRINT_DEBUG_MESSAGES){
+			System.out.println("number of chromo selected "+selectedForPresenationToUser.size());
+		}
 	}
 
 
 	public double getUserScoreFor(IChromosome a_subject){
 		return selectedForPresenationToUser.get(a_subject);
 	}
-	
-	
+
+
 	public void setUserScoreFor(IChromosome a_subject, double userScore){
-		
-		
+
+
 		selectedForPresenationToUser.put(a_subject, userScore);
 
-		
+
 	}
-	
+
 	public boolean wasSelectedForPresentationToUser(IChromosome a_subject){
 		return selectedForPresenationToUser.containsKey(a_subject);
 	}
@@ -153,6 +184,22 @@ public class JGAPAdapter implements Iterable<IChromosome> {
 	public Configuration getConfiguration() {
 
 		return conf;
+	}
+
+	public Population getCurrentPopulation() {
+		// TODO Auto-generated method stub
+		return genotype.getPopulation();
+	}
+
+	public void printPopulation() {
+		Population active=genotype.getPopulation();
+
+		System.out.println("message from adaptor: ");
+		System.out.println("curr population: ");
+		for(int i=0;i<active.size();i++){
+			System.out.println(active.getChromosome(i).toString());
+		}
+
 	}
 
 

@@ -10,9 +10,12 @@ import java.util.Observer;
 
 
 
+import java.util.Stack;
+
 import org.jgap.Chromosome;
 import org.jgap.Configuration;
 import org.jgap.InvalidConfigurationException;
+import org.jgap.Population;
 
 import processing.core.*;
 
@@ -20,11 +23,7 @@ import org.jgap.IChromosome;
 import org.jgap.impl.DefaultConfiguration;
 public class ProcessingApplication extends PApplet implements Observer {
 
-
-
-	private boolean testing_shakeup=true;;
-
-
+    public static final boolean PRINT_DEBUG_MESSAGES=false;
 
 	private static ProcessingApplication processingAppInstance;
 	public static final int APPLICATION_WIDTH=800;
@@ -32,11 +31,13 @@ public class ProcessingApplication extends PApplet implements Observer {
 
 	//GA params
 	public static final int GA_SHAKEUP_PERIOD=2;
+	public static final double THRESHOLD_PERFORMANCE_DECLINE=-.5;
 	public static final int NUM_GENERATIONS=8;
-	public static final int NUM_INDIVIDUALS_TO_SHOW_USER_PER_GENERATION=4;
+	public static final int POPULATION_SIZE = 3;
+	public static final int NUM_INDIVIDUALS_TO_SHOW_USER_PER_GENERATION=2;
 
 	//math problem params
-	public static final int MATH_PROBLEMS_PER_SET=4;
+	public static final int MATH_PROBLEMS_PER_SET=2;
 	public static final int MAX_ARGUMENT_VALUE = 9;
 	public static final int MAX_DIGITS_IN_ANSWER =  2;
 
@@ -76,10 +77,11 @@ public class ProcessingApplication extends PApplet implements Observer {
 	public static final int LOW=0;
 	public static final int MED=1;
 	public static final int NUM_APTITUDE_LEVELS=3;
+	
 
 
 	private List<GAShakeupStrategy> shakeupStrategies=new ArrayList<GAShakeupStrategy>();
-
+    private List<GAShakeupStrategy> influenceOrder = new ArrayList<GAShakeupStrategy>();
 
 	private static int curr_child_aptitude;
 	public static int getCurrentChildAptitude(){
@@ -403,7 +405,7 @@ public class ProcessingApplication extends PApplet implements Observer {
 
 
 
-
+int test_state=0;
 	public void feedbackDone(){
 
 		if(!mathProblemSetHandler.currentProblemSetFinished()){
@@ -416,13 +418,16 @@ public class ProcessingApplication extends PApplet implements Observer {
 			//tell the child performance monitor to record the summary score for the current individual.
 			childPerformanceMonitor.recordSummaryScoreForCurrentIndividual(mathProblemSetHandler.getResultsForProblemSet());
 
+			//more individuals in this generation to examine
 			if(currentPopulation.hasNext()){
 				configureApplicationForNextIndividual();
 				state=SIGNALING_NEXT_INDIVIDUAL;
 			}
-			else {
+			else { //next generation
 				childPerformanceMonitor.recordSummaryDataForCurrentPopulation();
 				generationNumber++;
+				
+				
 				if(generationNumber<NUM_GENERATIONS){
 					if(generationNumber%GA_SHAKEUP_PERIOD==0){
 						shakeUpGeneticAlgorithmOnTheBasisOfIntergenerationalChildPerformance();
@@ -446,18 +451,67 @@ public class ProcessingApplication extends PApplet implements Observer {
 	private void shakeUpGeneticAlgorithmOnTheBasisOfIntergenerationalChildPerformance() {
 		IntergenerationalPerformanceTrend currentTrend=childPerformanceMonitor.getCurrentIntergenerationalPerformanceTrend();
 		if(shouldShakeUpGeneticAlgorithm(currentTrend)){
-
-
-			GAShakeupStrategy strategy=pickRandomStrategy(); //only policy I have so far
-
-			if(strategy.hasUndoneChanges()){
-				strategy.undo();
-			}
-			else strategy.shakeUp();
-
-
+			 applyRandomStrategyToAlgorithm();
+		}
+		if(shouldRollBackMostRecentStrategy(currentTrend)){
+			rollbackMostRecentStrategy();
 		}
 
+	}
+	
+	
+	private void rollbackMostRecentStrategy() {
+		
+		GAShakeupStrategy mostRecent=popMostRecentInfluence();
+		Population populationBeforeAction=mostRecent.getPopulationBeforeAction();
+	    jgapAdaptor.replaceActivePopulation(populationBeforeAction);
+	
+	
+	}
+
+
+	private boolean shouldRollBackMostRecentStrategy(
+			IntergenerationalPerformanceTrend currentTrend) {
+		return currentTrend==IntergenerationalPerformanceTrend.WORSENED_SEVERELY&&!influenceOrder.isEmpty();
+	}
+
+
+	private void applyRandomStrategyToAlgorithm(){
+		
+		GAShakeupStrategy strategy=pickRandomStrategy(); //only policy I have so far
+
+		if(strategy.hasUndoneChanges()){
+			strategy.undo();
+			eraseInfluenceRecord(strategy);
+		}
+		else {
+			strategy.shakeUp();
+		}
+		recordInfluenceRecord(strategy);
+		
+	
+	}
+	
+	private GAShakeupStrategy popMostRecentInfluence(){
+		int top=influenceOrder.size()-1;
+		GAShakeupStrategy result= influenceOrder.get(top);
+		eraseInfluenceRecord(top);
+		return result;
+	}
+
+
+	private void recordInfluenceRecord(GAShakeupStrategy strategy) {
+		influenceOrder.add(strategy);
+		
+	}
+
+
+	private void eraseInfluenceRecord(GAShakeupStrategy strategy) {
+		influenceOrder.remove(strategy);	
+	}
+	
+	private void eraseInfluenceRecord(int idx_of_strategy) {
+		influenceOrder.remove(idx_of_strategy);	
 	}
 
 

@@ -143,15 +143,29 @@ public class MathProblem {
 
 	public int[] getSolutionDigits(int numDigits) {
 
-		int[] solutionDigits=new int[numDigits];
+		int[] temp=new int[numDigits];
 		int solution_quo=solution;
-		for(int i=0;i<solutionDigits.length;i++){
+		int i=temp.length-1;
+		int num_digits_in_solution=0;
+		for(;i>-1;i--){
+			
 			int digit=solution_quo%10;
+			temp[i]=digit;
+			num_digits_in_solution++;
+			
 			solution_quo/=10;
-			solutionDigits[i]=digit;
+			if(solution_quo==0) break;
+			
 		}
 
-		return solutionDigits;
+		int[] result=new int[num_digits_in_solution];
+		for(int j=0;j<num_digits_in_solution;j++){
+			result[j]=temp[i];
+			i++;	
+		}
+		
+		
+		return result;
 	}
 
 

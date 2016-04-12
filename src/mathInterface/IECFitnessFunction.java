@@ -16,10 +16,10 @@ public class IECFitnessFunction extends FitnessFunction {
 
 	private int sign=1;
 	//boolean done_testing=false;
-	
 
-	
-	
+
+
+
 	@Override
 	protected double evaluate(IChromosome a_subject) {
 		double expec_weight=default_expected_fitness_weight;
@@ -32,9 +32,12 @@ public class IECFitnessFunction extends FitnessFunction {
 
 		//just use the automated part of the fitness function if the individual lacks a user rating.
 		if(JGAPAdapter.getInstance().wasSelectedForPresentationToUser(a_subject)){
-		 	userScore=JGAPAdapter.getInstance().getUserScoreFor(a_subject);
-		 	System.out.println("message from fitness function: ");
-			System.out.println("got user score from the jgap adaptor: "+userScore);
+			userScore=JGAPAdapter.getInstance().getUserScoreFor(a_subject);
+
+			if(ProcessingApplication.PRINT_DEBUG_MESSAGES){
+				System.out.println("message from fitness function: ");
+				System.out.println("got user score from the jgap adaptor: "+userScore);
+			}
 		}
 		else {
 			expec_weight=1.0;
@@ -42,7 +45,7 @@ public class IECFitnessFunction extends FitnessFunction {
 		}
 
 
-	    //put user score (raw, between 0 and 1) on same scale as 
+		//put user score (raw, between 0 and 1) on same scale as 
 		//expected fitness; 
 		//weight the two constituents of the overall fitness value
 		//(i elected to allow for abolute large values of the fitness function
@@ -50,8 +53,10 @@ public class IECFitnessFunction extends FitnessFunction {
 		double weighted_exp_fitness=expec_weight*expectedFitness;
 		double scaled_user_score=userScore*FeedbackTemplate.getMaximumExpectedFitness();
 		double weighted_user_score_fitness=user_score_weight*scaled_user_score;
-		//System.out.println("weighted user score: "+weighted_user_score_fitness);
-		//System.out.println("weighted expec fitness: "+weighted_exp_fitness);
+		if(ProcessingApplication.PRINT_DEBUG_MESSAGES){
+			System.out.println("weighted user score: "+weighted_user_score_fitness);
+			System.out.println("weighted expec fitness: "+weighted_exp_fitness);
+		}
 		return weighted_exp_fitness+weighted_user_score_fitness;
 
 	}
@@ -59,24 +64,33 @@ public class IECFitnessFunction extends FitnessFunction {
 
 
 	public void adjustWeights(double adjust_actual_fitness_weight){
-		System.out.println("--Mesage fro IECFitnessFunction--");
-		System.out.println("PRE-Adjusted actual fitness weight: "+default_user_score_weight);
-		System.out.println("PRE-Adjusted expected fitness weight: "+default_expected_fitness_weight);
+
+		if(ProcessingApplication.PRINT_DEBUG_MESSAGES){
+			System.out.println("--Mesage fro IECFitnessFunction--");
+			System.out.println("PRE-Adjusted actual fitness weight: "+default_user_score_weight);
+			System.out.println("PRE-Adjusted expected fitness weight: "+default_expected_fitness_weight);
+		}
 		default_user_score_weight=ProcessingApplication.getInstance().constrain(default_user_score_weight+adjust_actual_fitness_weight,0,1);
 		default_expected_fitness_weight=1-default_user_score_weight;
-		System.out.println("Adjusted actual fitness weight: "+default_user_score_weight);
-		System.out.println("Adjusted expected fitness weight: "+default_expected_fitness_weight);
+		if(ProcessingApplication.PRINT_DEBUG_MESSAGES){
+			System.out.println("Adjusted actual fitness weight: "+default_user_score_weight);
+			System.out.println("Adjusted expected fitness weight: "+default_expected_fitness_weight);
+		}
 	}
 
 	public void invertSign(){
+		if(ProcessingApplication.PRINT_DEBUG_MESSAGES){
 		System.out.println("--Mesage fro IECFitnessFunction--");
 		System.out.println("--pre adjust sign: "+sign);
+		}
 		sign=(sign<1? 1:-1);
-		System.out.println("--post adjust sign: "+sign);
+		if(ProcessingApplication.PRINT_DEBUG_MESSAGES){
+			System.out.println("--post adjust sign: "+sign);
+		}
 	}
 
 
-	
+
 
 
 

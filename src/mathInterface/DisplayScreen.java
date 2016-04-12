@@ -158,12 +158,14 @@ public class DisplayScreen extends Observable {
 	}
 
 	void renderImage(){
+		
+	
 		if(img!=null)
 			processing.image(img, img_offset_x-img.width/2, img_offset_y-img.height/2);
 	}
 
 	void renderText(){
-		//processing.textSize(text_size); //to do, refactor text size into vt class too
+		
 		for(VariableText vt : text){
 			vt.display(processing);
 		}
@@ -178,6 +180,7 @@ public class DisplayScreen extends Observable {
 	}
 
 	public void clearText() {
+		
 		text=new LinkedList<VariableText>();
 
 	}
@@ -255,6 +258,12 @@ public class DisplayScreen extends Observable {
 	  img_offset_x+=off_x;
 	  img_offset_y+=off_y;
   }
+
+
+public int numVariableText() {
+	// TODO Auto-generated method stub
+	return text.size();
+}
 
 
 

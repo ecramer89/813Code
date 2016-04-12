@@ -39,8 +39,8 @@ public class Feedback extends Observable implements Observer  {
 	static final String RESUBMIT_MESSAGE="Try again!";
 	private static VariableText allowResubmitText;
 
-	static PImage DEFAULT_CORRECT_VERIFICATION_IMAGE=null;
-	static PImage DEFAULT_INCORRECT_VERIFICATION_IMAGE=null;
+	public static PImage DEFAULT_CORRECT_VERIFICATION_IMAGE=null;
+	public static PImage DEFAULT_INCORRECT_VERIFICATION_IMAGE=null;
 
 
 	private static final int BASE_DELAY_INDEX=0;
@@ -123,23 +123,17 @@ public class Feedback extends Observable implements Observer  {
 
 	public Feedback(){
 		allowResubmitText=new VariableText(RESUBMIT_MESSAGE,ProcessingApplication.UI_FONT_COLOR,0,0,ProcessingApplication.UI_FONT_SIZE);
-		loadImages();
-		feedbackScreens=new LinkedList<DisplayScreen>();
-		
-	}
 
-	private void loadImages() {
-		ProcessingApplication processing=ProcessingApplication.getInstance();
-		DEFAULT_INCORRECT_VERIFICATION_IMAGE=processing.loadImage("C:/Users/root960/Desktop/emily/IAT813/project/applicationData/images/incorrect.png");
-		DEFAULT_CORRECT_VERIFICATION_IMAGE=processing.loadImage("C:/Users/root960/Desktop/emily/IAT813/project/applicationData/images/correct.png");
-
-
+		DEFAULT_CORRECT_VERIFICATION_IMAGE=ChromosomeToFeedbackManifester.DEFAULT_CORRECT_VERIFICATION_IMAGE;
+		DEFAULT_INCORRECT_VERIFICATION_IMAGE=ChromosomeToFeedbackManifester.DEFAULT_INCORRECT_VERIFICATION_IMAGE;
 
 		correctVerificationImage=DEFAULT_CORRECT_VERIFICATION_IMAGE;
 		incorrectVerificationImage=DEFAULT_INCORRECT_VERIFICATION_IMAGE;
-
+		feedbackScreens=new LinkedList<DisplayScreen>();
 
 	}
+
+
 
 
 	public void updateAllowingResubmission(double p_allow_resubmission){
@@ -262,20 +256,25 @@ public class Feedback extends Observable implements Observer  {
 		//highlight those digits in red.
 		int[] userAnswerDigits=problem.getAnswerDigits();
 		int[] solutionDigits=problem.getSolutionDigits(MathProblemSetHandler.MAX_DIGITS_IN_ANSWER);
-
+	
 		int in_solution=0;
 		int in_answer=0;
 		for(;in_answer<userAnswerDigits.length;in_answer++){
 			int ans_digit=userAnswerDigits[in_answer];
 			VariableText digit=errorFlagScreen.getVariableText(in_answer);
 			digit.update(ans_digit);
+			digit.updateColor(ProcessingApplication.UI_FONT_COLOR);
 			if(in_answer>=solutionDigits.length){
+			
 				digit.updateColor(ERROR_COLOR);
 			}
 			else {
 				int sol_digit=solutionDigits[in_solution];
 				if(ans_digit!=sol_digit){
 					digit.updateColor(ERROR_COLOR);
+				}
+				else {
+					digit.updateColor(ProcessingApplication.UI_FONT_COLOR);
 				}
 			}
 		}
@@ -288,9 +287,21 @@ public class Feedback extends Observable implements Observer  {
 	}
 
 	public void updateCorrectAnswerScreen(MathProblem problem) {
+		int[] solutionDigits=problem.getSolutionDigits(MathProblemSetHandler.MAX_DIGITS_IN_ANSWER);
+		//System.out.println("message from feedback; solu digis");
+		//for(int i=0;i<solutionDigits.length;i++)
+			//System.out.println(solutionDigits[i]);
+		int in_solu=0;
+		for(;in_solu<solutionDigits.length;in_solu++){   
+			//correctAnswerScreen.clearText();
+			VariableText digit=correctAnswerScreen.getVariableText(in_solu);
+			digit.update(solutionDigits[in_solu]);
+		}
+		for(;in_solu<correctAnswerScreen.numVariableText();in_solu++){
+			VariableText digit=correctAnswerScreen.getVariableText(in_solu);
+			digit.update(" ");
+		}
 
-		correctAnswerScreen.clearText();
-		correctAnswerScreen.addVariableText(new VariableText(problem.solution, CORRECT_VERIFICATION_COLOR, 0,0,ProcessingApplication.UI_FONT_SIZE));
 	}
 
 	public void updateElaborationScreens(MathProblem problem) {
@@ -438,6 +449,14 @@ public class Feedback extends Observable implements Observer  {
 		correctAnswerScreen.setDelayBeforeDisplay((int)base_feedback_delay);
 		correctAnswerScreen.setDurationOfDisplay((int)DEFAULT_SCREEN_DURATION);
 		correctAnswerScreen.setName("correct answer");
+		VariableText answerFirstDigit=new VariableText("",CORRECT_VERIFICATION_COLOR,-ProcessingApplication.UI_FONT_SIZE/2-ProcessingApplication.UI_FONT_SIZE/4,0,ProcessingApplication.UI_FONT_SIZE);
+		VariableText answerSecondDigit=new VariableText("",CORRECT_VERIFICATION_COLOR,0,0,ProcessingApplication.UI_FONT_SIZE);
+		VariableText answerThirdDigit=new VariableText("",CORRECT_VERIFICATION_COLOR,ProcessingApplication.UI_FONT_SIZE/2+ProcessingApplication.UI_FONT_SIZE/4,0,ProcessingApplication.UI_FONT_SIZE);
+
+		correctAnswerScreen.addVariableText(answerFirstDigit);
+		correctAnswerScreen.addVariableText(answerSecondDigit);
+		correctAnswerScreen.addVariableText(answerThirdDigit);
+
 		correctAnswerScreen.adjustDelayBeforeDisplay(correct_answer_delay);
 	}
 
@@ -549,7 +568,7 @@ public class Feedback extends Observable implements Observer  {
 		for(int i=0;i<staticFields.length;i++){
 			double other_field=feedback.staticFields[i];
 			double this_field=staticFields[i];
-	
+
 			if(count(this_field,other_field)){
 				result+=Math.pow(this_field-other_field, 2);
 			}
@@ -558,9 +577,9 @@ public class Feedback extends Observable implements Observer  {
 	}
 
 
- private boolean count(double this_field, double other_field){
-	 return !(this_field==DISCOUNT)&& !(other_field==DISCOUNT);
- }
+	private boolean count(double this_field, double other_field){
+		return !(this_field==DISCOUNT)&& !(other_field==DISCOUNT);
+	}
 
 
 

@@ -1,16 +1,20 @@
 package mathInterface;
 
 public enum IntergenerationalPerformanceTrend {
-	IMPROVED, WORSENED, STABLE;
+	IMPROVED, WORSENED, STABLE, WORSENED_SEVERELY;
 
 	static int min_improvement=0;
 	static int max_decline=0;
+	static final double THRESHOLD_DECLINE=ProcessingApplication.THRESHOLD_PERFORMANCE_DECLINE;
 
 
 	public static void setMinImprovementAndMaxDecline(int min_improvement, int max_decline){
 		IntergenerationalPerformanceTrend.min_improvement=min_improvement;
 		IntergenerationalPerformanceTrend.max_decline=max_decline;
 	}
+
+
+
 
 
 	public static IntergenerationalPerformanceTrend calculateTrend(
@@ -22,16 +26,24 @@ public enum IntergenerationalPerformanceTrend {
 		System.out.println("domain end index: "+domain_end);
 		double average_slope=calculateAverageSlope(intergenerationalPerformanceData, domain_start,
 				domain_end);
-		switch(directionOf(average_slope)){
-		case 0:
-			return STABLE;
-		case 1:
-			return IMPROVED;
-		case -1:
-			return WORSENED;
-		}
-		return null;
+
+
+		return slopeToTrend(average_slope);
+
 	}
+
+
+	private static IntergenerationalPerformanceTrend slopeToTrend(
+			double average_slope) {
+		// TODO Auto-generated method stub
+		if(average_slope>min_improvement) return IMPROVED;
+		if(average_slope<max_decline) return WORSENED;
+		if(average_slope<THRESHOLD_DECLINE) return WORSENED_SEVERELY;
+		return STABLE;
+	}
+
+
+
 
 
 	//store n-1 differences
@@ -41,9 +53,9 @@ public enum IntergenerationalPerformanceTrend {
 			GenerationPerformanceData[] intergenerationalPerformanceData,
 			int domain_start, int domain_end) {
 		double sumOfDelta=0;
-		System.out.println("---Message from Integenerational performance trend---");
+
 		int domain_size=(domain_end-domain_start)+1; 
-		System.out.println("domain size: "+domain_size);
+
 
 		for(int i=1; i<domain_size;i++){
 			//get the previous score.
@@ -54,13 +66,18 @@ public enum IntergenerationalPerformanceTrend {
 			double curr_score=curr_data.average();
 			double delta=curr_score-prev_score;
 			sumOfDelta+=delta;
+
 		}
 
 		double slope=sumOfDelta/(double)(domain_size-1);
 
-		System.out.println("sum of deltas: "+sumOfDelta);
-		System.out.println("domain size (-1): "+(domain_size-1));
-		System.out.println("Calculated slope: "+slope);
+		if(ProcessingApplication.PRINT_DEBUG_MESSAGES){
+			System.out.println("---Message from Integenerational performance trend---");
+			System.out.println("domain size: "+domain_size);
+			System.out.println("sum of deltas: "+sumOfDelta);
+			System.out.println("domain size (-1): "+(domain_size-1));
+			System.out.println("Calculated slope: "+slope);
+		}
 
 		return slope;
 	}
@@ -70,10 +87,5 @@ public enum IntergenerationalPerformanceTrend {
 	}
 
 
-	private static int directionOf(double average_slope) {
-		if(average_slope>min_improvement) return 1;
-		if(average_slope<max_decline) return -1;
-		return 0;
 
-	}
 }

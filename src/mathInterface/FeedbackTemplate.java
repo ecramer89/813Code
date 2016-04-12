@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class FeedbackTemplate {
 
-	
+
 	static Feedback exploratory=new Feedback();
 	static Feedback directive=new Feedback();
 	static Feedback[] templates=new Feedback[]{exploratory,directive};
@@ -24,7 +24,7 @@ public class FeedbackTemplate {
 
 	private static double maxDistanceBetweenFeedbacks;
 	private static FeedbackTemplate instance;
-    private static double max_exp_fitness;
+	private static double max_exp_fitness;
 
 
 	private FeedbackTemplate(){
@@ -33,10 +33,10 @@ public class FeedbackTemplate {
 		initializeMap();
 		cacheMaxDistanceBetweenFeedbackAndOther();
 		cacheMaximumExpectedFitness();
-		
+
 	}
 
-	
+
 	private static void cacheMaximumExpectedFitness(){
 		//actually an overestimate because you could not be equidistant (as far as possible) from every template at the same time,
 		//but that is okay.
@@ -44,7 +44,7 @@ public class FeedbackTemplate {
 		double max_exp_distance_from_good=transferFunction(0,1,1)*templates.length;
 		max_exp_fitness=max_exp_prox_to_bad+max_exp_distance_from_good;
 	}
-	
+
 	public static double getMaximumExpectedFitness(){
 		return max_exp_fitness;
 	}
@@ -81,7 +81,7 @@ public class FeedbackTemplate {
 		exploratory.updateAttributeIsolationParameters(1,2000);
 		exploratory.updateVerificationParameters(1,1000);
 		exploratory.updateFeedbackDelay(1000);
-		
+
 
 
 		directive.updateAllowingResubmission(1);
@@ -92,7 +92,7 @@ public class FeedbackTemplate {
 		directive.updateAttributeIsolationParameters(0,0);
 		directive.updateVerificationParameters(Feedback.EXPLICIT_VERIFICATION,Feedback.IMAGE_VERIFICATION);
 		directive.updateFeedbackDelay(100);
-		
+
 
 
 		preSearch.updateAllowingResubmission(1);
@@ -103,7 +103,7 @@ public class FeedbackTemplate {
 		preSearch.updateAttributeIsolationParameters(Feedback.DISCOUNT,Feedback.DISCOUNT);
 		preSearch.updateVerificationParameters(Feedback.DISCOUNT,Feedback.DISCOUNT);
 		preSearch.updateFeedbackDelay(Feedback.DISCOUNT);
-		
+
 
 
 
@@ -117,12 +117,13 @@ public class FeedbackTemplate {
 			maxDistanceBetweenFeedbacks+=Math.pow(gp.allelleRange(),2);
 		}
 		maxDistanceBetweenFeedbacks=Math.sqrt(maxDistanceBetweenFeedbacks);
-		/*System.out.println("Message from FeedbackTemplate");
-		System.out.println("Maximum distance between feedbacks: "+maxDistanceBetweenFeedbacks);
-	*/
-	
-	
-	
+		if(ProcessingApplication.PRINT_DEBUG_MESSAGES){
+			System.out.println("Message from FeedbackTemplate");
+			System.out.println("Maximum distance between feedbacks: "+maxDistanceBetweenFeedbacks);
+		}
+
+
+
 	}
 
 
@@ -134,7 +135,7 @@ public class FeedbackTemplate {
 		return instance;
 	}
 
-	 //param sign: do you punish distance from good and proximity to bad templates or vice versa?
+	//param sign: do you punish distance from good and proximity to bad templates or vice versa?
 	private double calculateFitnessForChildAptitude(
 			Feedback feedback, int sign) {
 		double result=0;
@@ -146,10 +147,12 @@ public class FeedbackTemplate {
 			double weighting=lookupWeighting(template,ProcessingApplication.getCurrentChildAptitude());
 			result+=transferFunction(distance,weighting, sign);
 		}
-		
-		/*System.out.println("Message from FeedbackTemplate");
-		System.out.println("fitness for proximity to aptitude-appropriate templates: "+result);
-	*/
+
+
+		if(ProcessingApplication.PRINT_DEBUG_MESSAGES){
+			System.out.println("Message from FeedbackTemplate");
+			System.out.println("fitness for proximity to aptitude-appropriate templates: "+result);
+		}
 		return result;
 	}
 
@@ -161,12 +164,13 @@ public class FeedbackTemplate {
 			double distance=badFeedback.distanceFrom(feedback);
 			result+=sign*distance;
 		}
-		/*System.out.println("Message from FeedbackTemplate");
-		System.out.println("fitness for proximity to bad feedbacks: "+result);
-		*/
-		
+		if(ProcessingApplication.PRINT_DEBUG_MESSAGES){
+			System.out.println("Message from FeedbackTemplate");
+			System.out.println("fitness for proximity to bad feedbacks: "+result);
+		}
+
 		return result;
-		
+
 	}
 
 

@@ -44,9 +44,10 @@ public class GenerationPerformanceData {
 			variance+=sqr_deviation;
 		}
 		standard_deviation=Math.sqrt(variance);
-
-		System.out.println("variance: "+variance);
-		System.out.println("standard_deviation: "+standard_deviation);
+		if(ProcessingApplication.PRINT_DEBUG_MESSAGES){
+			System.out.println("variance: "+variance);
+			System.out.println("standard_deviation: "+standard_deviation);
+		}
 	}
 
 
@@ -61,13 +62,14 @@ public class GenerationPerformanceData {
 			averageScore+=x;	
 		}
 		averageScore=averageScore/(double)rawScores.length;
-
-		System.out.println("---message from GenerationPerformanceData---");
-		System.out.println("summary data for the current generation: ");
-		System.out.println("n: "+rawScores.length);
-		System.out.println("averageScore: "+averageScore);
-		System.out.println("highScore: "+highScore);
-		System.out.println("lowScore: "+lowScore);
+		if(ProcessingApplication.PRINT_DEBUG_MESSAGES){
+			System.out.println("---message from GenerationPerformanceData---");
+			System.out.println("summary data for the current generation: ");
+			System.out.println("n: "+rawScores.length);
+			System.out.println("averageScore: "+averageScore);
+			System.out.println("highScore: "+highScore);
+			System.out.println("lowScore: "+lowScore);
+		}
 	}
 
 
