@@ -51,7 +51,15 @@ public class ProcessingApplication extends PApplet implements Observer {
 
 
 	Iterator<IChromosome> currentPopulation;
-	private static final int DELAY_BEFORE_START_TIME = 120;
+	
+	
+	private String displayText;
+	private float displayFontSize;
+	private float textDisplayWidth=APPLICATION_WIDTH-UI_FONT_SIZE*2;
+	private float textDisplayHeight=APPLICATION_HEIGHT-UI_FONT_SIZE*2;
+	private float textDisplayArea=textDisplayWidth*textDisplayHeight;
+	
+	private static final int DELAY_BEFORE_START_TIME = 5000;
 	private static final int RECORDING_APTITUDE = 0;
 	public static final int RUNNING_INDIVIDUAL=1;
 	public static final int UPDATING_POPULATION=2;
@@ -77,6 +85,8 @@ public class ProcessingApplication extends PApplet implements Observer {
 	public static final int LOW=0;
 	public static final int MED=1;
 	public static final int NUM_APTITUDE_LEVELS=3;
+
+	private static final int FAKE_CONFIGURATION_DELAY = 400;
 	
 
 
@@ -133,7 +143,7 @@ public class ProcessingApplication extends PApplet implements Observer {
 
 
 	private String intToAptitude(int i) {
-		// TODO Auto-generated method stub
+	
 		switch(i){
 		case LOW: 
 			return "LOW";
@@ -190,8 +200,11 @@ public class ProcessingApplication extends PApplet implements Observer {
 		background(UI_BACKGROUND_COLOR);
 		fill(UI_FONT_COLOR);
 		textAlign(CENTER);
+		text("(Click to skip ahead)",UI_FONT_SIZE,height-UI_FONT_SIZE, textDisplayWidth,UI_FONT_SIZE*2);
 	}
 
+	
+	
 	public void draw() {
 		switch(state){
 		case RECORDING_APTITUDE:
@@ -199,58 +212,112 @@ public class ProcessingApplication extends PApplet implements Observer {
 			return;
 		case DELAY_BEFORE_START:
 			handleTransitionScreen();
-			text("Thanks!", width/2, height/2);
-			text("Configuring first set of feedbacks... one moment.", width/2, height/2+50);
+			textSize(20);
+		
+			text(displayText,UI_FONT_SIZE,UI_FONT_SIZE, textDisplayWidth,(int)(textDisplayHeight/1.5));
+			int config_timer=delay_before_start_timer-(DELAY_BEFORE_START_TIME-FAKE_CONFIGURATION_DELAY);
+            
+			
+			if(config_timer==0){
+            	appendPopulationDataToDisplayText();
+            	
+            }
+            if(config_timer>0) {
+            	text("Configuring initial population... please wait.",UI_FONT_SIZE,textDisplayHeight/2+UI_FONT_SIZE*2, textDisplayWidth,textDisplayHeight);
+            	text(config_timer+"",UI_FONT_SIZE,textDisplayHeight/2+UI_FONT_SIZE*3, textDisplayWidth,textDisplayHeight);
+            }
 
 			if(wait_one_frame_to_configure==0){
 				configureApplicationForNextGeneration();
 				configureApplicationForNextIndividual(); //for first individual.
 				wait_one_frame_to_configure=-1;
+				//can print the population info now.
 			}
 
 			if(wait_one_frame_to_configure>0) {
 				wait_one_frame_to_configure--;
 			}
-
 			return;
+			
+			
+			
+			
 		case SIGNALING_NEXT_INDIVIDUAL:
 			handleTransitionScreen();
-			text("Set completed.", width/2, height/2);
-			text("Configuring next problem set... one moment.", width/2, height/2+50);
+			textSize(20);
+			text(displayText,UI_FONT_SIZE,UI_FONT_SIZE, textDisplayWidth,textDisplayHeight/2);
+			config_timer=delay_before_start_timer-(DELAY_BEFORE_START_TIME-FAKE_CONFIGURATION_DELAY);
+            
+			
+			if(config_timer==0){
+            	appendIndividualDataToDisplayText();
+            }
+            if(config_timer>0) {
+            	
+            	text(config_timer+"",UI_FONT_SIZE,textDisplayHeight/2+UI_FONT_SIZE*3, textDisplayWidth,textDisplayHeight);
+            }
+			/*
+			 * want it to say:
+			 * finished evaluating this individual...
+			 * calculating observed fitness...
+			 * observed firtness = 
+			 * 
+			 * calculating total fitness
+			 * expected fitness is
+			 * observd fitness is
+			
+			 * final fitness is 
+			 * 
+			 * 
+			 * 
+			 * 
+			 */
+		
 			return;
 		case UPDATING_POPULATION:
 			handleTransitionScreen();
 			text("All sets completed.", width/2, height/2);
 			text("Configuring next generation of feedbacks... please wait.", width/2, height/2+50);
+			
+			/*
+			 * i also want it to say that it is selecting subset of individuals for presentation to the user.
+			 * want it so say list their fitnesses and to colour them by whether they ar ehigh or low
+			 * and to express the number of high to low individuals its choosing
+			 * 
+			 */
+			
+			
+			
 			text(delay_before_start_timer, width/2, height/2+100);
 			return;
+			
+			
+			
+			///add another screen, this one will display:
+			//information about the intergenerational trend
+			
+			//add another screen, this one will display:
+			//information about the shakeup strategy applied (if we apply a shakeup strategy)
 		}
 
 
 		mathProblemUI.update();
 
-
-
-
-		//for testing
-		displayCurrentFeedbackInfo();
-
 	}
 
 
-	private void displayCurrentFeedbackInfo(){
-		fill(255);
-		rect(width/2-190, height-80, 380, 80);
-		int[] col=feedbackManifester.currFeedbackColor();
-		fill(col[0],col[1],col[2]);
-		textSize(20);
-		textAlign(CENTER);
-		text(feedbackManifester.currFeedback(), width/2, height-40);
+	
+
+    String fitness_of_last_individual="";
+	private void appendIndividualDataToDisplayText() {
+		displayText=displayText+"\n "+fitness_of_last_individual;
 	}
 
 
-
-
+	private void appendPopulationDataToDisplayText() {
+		displayText=jgapAdaptor.summarizeCurrentPopulationAsString()+"\n"+jgapAdaptor.summarizeSelectedSubsetAsString();
+	
+	}
 
 
 	public void mousePressed(){
@@ -261,10 +328,25 @@ public class ProcessingApplication extends PApplet implements Observer {
 				handlePressedAptitudeButton(pressed);
 			}
 		}
-		else {
+		else if (state==RUNNING_INDIVIDUAL) {
 			/* if we clicked in the submit answer button, then delegate control to the feedback message */
 			mathProblemUI.mousePressed(mouseX-APPLICATION_WIDTH/2, mouseY-APPLICATION_HEIGHT/2);
 		}
+		else if (delayTimerActive()){
+			skipTransitionScreen();
+		}
+	}
+
+
+	//set to 20, provide a tiny delay following the press before we switch state
+	private void skipTransitionScreen() {
+		delay_before_start_timer=30;
+	}
+
+
+	private boolean delayTimerActive() {
+		
+		return delay_before_start_timer>0&&delay_before_start_timer<DELAY_BEFORE_START_TIME;
 	}
 
 
@@ -276,12 +358,20 @@ public class ProcessingApplication extends PApplet implements Observer {
 	}
 
 	int wait_one_frame_to_configure=1;
+
+	
+
+	
 	void handlePressedAptitudeButton(Button button){
 		button.flashToIndicatePressed(this);
 		recordButtonIDAsAptitude(button.id);
 
 		state=DELAY_BEFORE_START;
-		delay_before_start_timer=(int)(DELAY_BEFORE_START_TIME/2);
+		delay_before_start_timer=(int)(DELAY_BEFORE_START_TIME);
+		
+		
+		displayText=getDelayBeforeStartMessage();
+
 
 
 	}
@@ -289,9 +379,30 @@ public class ProcessingApplication extends PApplet implements Observer {
 
 
 
+	private String getDelayBeforeStartMessage() {
+		
+		
+		StringBuilder s=new StringBuilder();
+		s.append("Thank you!");
+		s.append("\n");
+		s.append("We will use this information to generate the first set of Feedbacks.");
+		s.append("\n");
+		s.append("Since you entered: "+intToAptitude(curr_child_aptitude));
+		s.append("\n");
+		s.append("We will reward PROXIMITY to: ");
+		s.append("\n");
+		s.append(FeedbackTemplate.getInstance().GetAppropriateForAsString(curr_child_aptitude));
+		s.append("We will reward DISTANCE from: ");
+		s.append("\n");
+		s.append(FeedbackTemplate.getInstance().getInappropriateForAsString(curr_child_aptitude));
+		
+		
+		return s.toString();
+	}
+
 
 	private void recordButtonIDAsAptitude(int id) {
-		// TODO Auto-generated method stub
+		
 		curr_child_aptitude=id;	
 	}
 
@@ -377,7 +488,7 @@ public class ProcessingApplication extends PApplet implements Observer {
 
 
 	private void setupNextProblemAndUpdateUI(){
-		numAttempts=0;
+	
 		VariableText usersAnswerFirstDigit=new VariableText("x",UI_FONT_COLOR,-UI_FONT_SIZE/2-UI_FONT_SIZE/4,0,UI_FONT_SIZE);
 		VariableText usersAnswerSecondDigit=new VariableText("x",UI_FONT_COLOR,0,0,UI_FONT_SIZE);
 		VariableText usersAnswerThirdDigit=new VariableText("x",UI_FONT_COLOR,UI_FONT_SIZE/2+UI_FONT_SIZE/4,0,UI_FONT_SIZE);
@@ -405,7 +516,7 @@ public class ProcessingApplication extends PApplet implements Observer {
 
 
 
-int test_state=0;
+
 	public void feedbackDone(){
 
 		if(!mathProblemSetHandler.currentProblemSetFinished()){
@@ -417,11 +528,12 @@ int test_state=0;
 			FeedbackChromosomeFactory.recordUserScoreAsFitnessTermForCurrentFeedback(feedbackManifester.getCurrentGenotype(), mathProblemSetHandler.getResultsForProblemSet());
 			//tell the child performance monitor to record the summary score for the current individual.
 			childPerformanceMonitor.recordSummaryScoreForCurrentIndividual(mathProblemSetHandler.getResultsForProblemSet());
-
+			setDisplayTextToSummarizeLastIndividual();
 			//more individuals in this generation to examine
 			if(currentPopulation.hasNext()){
 				configureApplicationForNextIndividual();
 				state=SIGNALING_NEXT_INDIVIDUAL;
+				
 			}
 			else { //next generation
 				childPerformanceMonitor.recordSummaryDataForCurrentPopulation();
@@ -443,6 +555,19 @@ int test_state=0;
 			}
 		}
 	}
+
+	private void setDisplayTextToSummarizeLastIndividual() {
+		StringBuilder s = new StringBuilder("");
+		s.append("Congratulations. You have finished evaluating this feedback.");
+		s.append("\n");
+		s.append("We're converting your score into a rating for this feedback... just a moment.");
+		displayText=s.toString();
+		
+		//cache the individual data as a string
+		fitness_of_last_individual=jgapAdaptor.getFitnessFunction().fitnessFunctionToStringFor(feedbackManifester.getCurrentGenotype());
+		
+	}
+
 
 	private boolean shouldShakeUpGeneticAlgorithm(IntergenerationalPerformanceTrend currentTrend){
 		return currentTrend==IntergenerationalPerformanceTrend.WORSENED || currentTrend==IntergenerationalPerformanceTrend.STABLE;

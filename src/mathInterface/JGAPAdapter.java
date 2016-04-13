@@ -187,7 +187,7 @@ public class JGAPAdapter implements Iterable<IChromosome> {
 	}
 
 	public Population getCurrentPopulation() {
-		// TODO Auto-generated method stub
+		
 		return genotype.getPopulation();
 	}
 
@@ -200,6 +200,46 @@ public class JGAPAdapter implements Iterable<IChromosome> {
 			System.out.println(active.getChromosome(i).toString());
 		}
 
+	}
+
+	
+	//summarize:
+	//n, 
+	//average fitness... etc.
+	
+	public String summarizeSelectedSubsetAsString() {
+		StringBuilder s = new StringBuilder("");
+		int n=selectedForPresenationToUser.size();
+		s.append("For presentation to you, we selected: "+n+" of these feedbacks...");
+		s.append("\n");
+		s.append("Their fitnesses are... ");
+		s.append("\n");
+		int i=1;
+		for(IChromosome c : selectedForPresenationToUser.keySet()){
+			s.append(i+++". "+Math.round(c.getFitnessValue()));
+			s.append("\n");
+		}
+		return s.toString();
+	}
+	
+	
+	public String summarizeCurrentPopulationAsString() {
+		StringBuilder s = new StringBuilder("");
+		int n=genotype.getPopulation().size();
+		s.append("Size of the current population: "+n);
+		s.append("\n");
+		double[] fitnesses=new double[n];
+		for(int i=0;i<n;i++){
+			fitnesses[i]=genotype.getPopulation().getChromosome(i).getFitnessValue();
+		}
+		GenerationPerformanceData data=new GenerationPerformanceData(fitnesses);
+		s.append("Average fitness: "+Math.round(data.average()));
+		s.append("\n");
+		s.append("Max fitness: "+Math.round(data.high()));
+		s.append("\n");
+		s.append("Min fitness: "+Math.round(data.low()));
+		s.append("\n");
+		return s.toString();
 	}
 
 

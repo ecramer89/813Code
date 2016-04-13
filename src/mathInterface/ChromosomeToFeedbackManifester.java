@@ -76,49 +76,45 @@ public class ChromosomeToFeedbackManifester  {
 		updateAllowingResubmission(phenotype, genotype);
 		
 		
-		updateIdentificationColor(phenotype, genotype);
 	}
 
 	
 	
-	private static void updateIdentificationColor(Feedback phenotype, IChromosome genotype) {
-		phenotype.updateIdentificationColor(new int[]{getIntegerAllelle(GenePosition.TEXT_COLOR_R, genotype),getIntegerAllelle(GenePosition.TEXT_COLOR_G, genotype),getIntegerAllelle(GenePosition.TEXT_COLOR_B, genotype)});
-		
-	}
+
 
 	private static void updateAllowingResubmission(Feedback phenotype, IChromosome genotype){
-		phenotype.updateAllowingResubmission(getDoubleAllelle(GenePosition.P_ALLOW_RESUBMIT, genotype));
+		phenotype.updateAllowingResubmission(getDoubleAllelle(FeedbackGeneType.P_ALLOW_RESUBMIT, genotype));
 
 	}
 
 	private static void updateDirectiveFeedbackParameters(Feedback phenotype, IChromosome genotype) {
-		phenotype.updateDirectiveFeedbackParameters(getDoubleAllelle(GenePosition.P_DIRECTIVE, genotype));
+		phenotype.updateDirectiveFeedbackParameters(getDoubleAllelle(FeedbackGeneType.P_DIRECTIVE, genotype));
 		/* types of directive feedback */
 		//provide the correct response
-		phenotype.updateProvideCorrectAnswerParameters(getDoubleAllelle(GenePosition.P_CORRECT_RESPONSE,genotype),getIntegerAllelle(GenePosition.CORRECT_RESPONSE_DELAY, genotype));
+		phenotype.updateProvideCorrectAnswerParameters(getDoubleAllelle(FeedbackGeneType.P_CORRECT_RESPONSE,genotype),getIntegerAllelle(FeedbackGeneType.CORRECT_RESPONSE_DELAY, genotype));
 
 		//highlight the errors in the childs solution
 
-		phenotype.updateErrorFlagParameters(getDoubleAllelle(GenePosition.P_ERROR_FLAG, genotype), getIntegerAllelle(GenePosition.ERROR_FLAG_DELAY, genotype));
+		phenotype.updateErrorFlagParameters(getDoubleAllelle(FeedbackGeneType.P_ERROR_FLAG, genotype), getIntegerAllelle(FeedbackGeneType.ERROR_FLAG_DELAY, genotype));
 
 	}
 
 	private static void updateElaborationParameters(Feedback phenotype, IChromosome genotype) {
-		phenotype.updateElaborationParameters(getDoubleAllelle(GenePosition.P_ELABORATE, genotype));
+		phenotype.updateElaborationParameters(getDoubleAllelle(FeedbackGeneType.P_ELABORATE, genotype));
 
-		phenotype.updateAttributeIsolationParameters(getDoubleAllelle(GenePosition.P_ATTRIBUTE_ISOLATION, genotype), getIntegerAllelle(GenePosition.ATTRIBUTE_ISOLATION_DURATION, genotype));
+		phenotype.updateAttributeIsolationParameters(getDoubleAllelle(FeedbackGeneType.P_ATTRIBUTE_ISOLATION, genotype), getIntegerAllelle(FeedbackGeneType.ATTRIBUTE_ISOLATION_DELAY, genotype));
 	}
 
 
 	private static void updateVerificationParameters(Feedback phenotype, IChromosome genotype) {
 
-		phenotype.updateVerificationParameters(getIntegerAllelle(GenePosition.VERIFICATION_TYPE, genotype),getIntegerAllelle(GenePosition.VERIFICATION_MODALITY, genotype));
+		phenotype.updateVerificationParameters(getIntegerAllelle(FeedbackGeneType.VERIFICATION_TYPE, genotype),getIntegerAllelle(FeedbackGeneType.VERIFICATION_MODALITY, genotype));
 	}
 
 
 
 	private static void updateFeedbackDelay(Feedback phenotype, IChromosome genotype) {
-		phenotype.updateFeedbackDelay(getIntegerAllelle(GenePosition.FEEDBACK_DELAY, genotype));
+		phenotype.updateFeedbackDelay(getIntegerAllelle(FeedbackGeneType.FEEDBACK_DELAY, genotype));
 	}
 
 
@@ -155,12 +151,12 @@ public class ChromosomeToFeedbackManifester  {
 	}
 
 	
-	private static double getDoubleAllelle(GenePosition pos,IChromosome genotype){
+	private static double getDoubleAllelle(FeedbackGeneType pos,IChromosome genotype){
 		return (Double)genotype.getGene(pos.ordinal()).getAllele();
 
 	}
 
-	private static int getIntegerAllelle(GenePosition pos, IChromosome genotype){
+	private static int getIntegerAllelle(FeedbackGeneType pos, IChromosome genotype){
 		return (Integer)genotype.getGene(pos.ordinal()).getAllele();
 
 	}

@@ -37,29 +37,16 @@ public class Feedback extends Observable implements Observer  {
 	static final String IMPLICIT_VERIFICATION_MESSAGE = "";
 	private static final int PRE_FEEDBACK = -1;
 	static final String RESUBMIT_MESSAGE="Try again!";
+	
 	private static VariableText allowResubmitText;
 
 	public static PImage DEFAULT_CORRECT_VERIFICATION_IMAGE=null;
 	public static PImage DEFAULT_INCORRECT_VERIFICATION_IMAGE=null;
 
 
-	private static final int BASE_DELAY_INDEX=0;
-	private static final int P_DIRECTIVE_INDEX=1;
-
-	private static final int P_CORRECT_ANSWER_INDEX=2;
-	private static final int CORRECT_ANSWER_DELAY_INDEX=3;
-	private static final int P_ERROR_FLAG_INDEX=4;
-	private static final int ERROR_FLAG_DELAY_INDEX=5;
-	private static final int P_ELABORATE_INDEX=6;
-
-	private static final int P_ATTRIBUTE_ISOLATION_INDEX=7;
-	private static final int ATTRIBUTE_ISOLATION_DELAY_INDEX=8;
-	private static final int P_ALLOW_RESUBMIT_INDEX=9;
-	private static final int VERIFICATION_TYPE_INDEX=10;
-	private static final int VERIFICATION_MODALITY_INDEX=11;
-
-	private double[] staticFields=new double[12];
-
+	private static final double UNINITIALIZED = -1000000;
+	private double[] staticFields=new double[FeedbackGeneType.values().length];
+	private String name;
 
 	/*parameters that are interpreted from the individual (chromosome)*/
 	private int base_feedback_delay;
@@ -122,6 +109,15 @@ public class Feedback extends Observable implements Observer  {
 
 
 	public Feedback(){
+		this("");
+	}
+
+
+
+
+	public Feedback(String name) {
+
+		this.name=name;
 		allowResubmitText=new VariableText(RESUBMIT_MESSAGE,ProcessingApplication.UI_FONT_COLOR,0,0,ProcessingApplication.UI_FONT_SIZE);
 
 		DEFAULT_CORRECT_VERIFICATION_IMAGE=ChromosomeToFeedbackManifester.DEFAULT_CORRECT_VERIFICATION_IMAGE;
@@ -130,7 +126,13 @@ public class Feedback extends Observable implements Observer  {
 		correctVerificationImage=DEFAULT_CORRECT_VERIFICATION_IMAGE;
 		incorrectVerificationImage=DEFAULT_INCORRECT_VERIFICATION_IMAGE;
 		feedbackScreens=new LinkedList<DisplayScreen>();
-
+		
+		
+		//set static fields to have a dummy value indicating they haven't been set yet.
+		for(int i=0;i<staticFields.length;i++){
+			staticFields[i]=UNINITIALIZED;
+		}
+		
 	}
 
 
@@ -138,13 +140,13 @@ public class Feedback extends Observable implements Observer  {
 
 	public void updateAllowingResubmission(double p_allow_resubmission){
 		p_allow_resubmit=p_allow_resubmission;
-		staticFields[P_ALLOW_RESUBMIT_INDEX]=p_allow_resubmit;
+		staticFields[FeedbackGeneType.P_ALLOW_RESUBMIT.ordinal()]=p_allow_resubmit;
 	}
 
 	public void updateDirectiveFeedbackParameters(double p_directive_) {
 		p_directive=p_directive_;
 
-		staticFields[P_DIRECTIVE_INDEX]=p_directive;
+		staticFields[FeedbackGeneType.P_DIRECTIVE.ordinal()]=p_directive;
 
 
 	}
@@ -154,23 +156,23 @@ public class Feedback extends Observable implements Observer  {
 		//provide the correct response
 		p_correct_answer=p_correct_answer_;
 		correct_answer_delay=correct_answer_delay_;
-		staticFields[P_CORRECT_ANSWER_INDEX]=p_correct_answer;
-		staticFields[CORRECT_ANSWER_DELAY_INDEX]=correct_answer_delay_;
+		staticFields[FeedbackGeneType.P_CORRECT_RESPONSE.ordinal()]=p_correct_answer;
+		staticFields[FeedbackGeneType.CORRECT_RESPONSE_DELAY.ordinal()]=correct_answer_delay_;
 	}
 
 	public void updateErrorFlagParameters(double p_flag_error_, int error_flag_delay_){
 		//highlight the errors in the childs solution
 		p_error_flag=p_flag_error_;
 		error_flag_delay=error_flag_delay_;
-		staticFields[P_ERROR_FLAG_INDEX]=p_error_flag;
-		staticFields[ERROR_FLAG_DELAY_INDEX]=error_flag_delay_;
+		staticFields[FeedbackGeneType.P_ERROR_FLAG.ordinal()]=p_error_flag;
+		staticFields[FeedbackGeneType.ERROR_FLAG_DELAY.ordinal()]=error_flag_delay_;
 
 	}
 
 	public void updateElaborationParameters(double p_elaborate_) {
 		p_elaborate=p_elaborate_;
 
-		staticFields[P_ELABORATE_INDEX]=p_elaborate;
+		staticFields[FeedbackGeneType.P_ELABORATE.ordinal()]=p_elaborate;
 
 	}
 
@@ -179,8 +181,8 @@ public class Feedback extends Observable implements Observer  {
 		//different types of elaborative feedback
 		p_attribute_isolation=p_attribute_isolation_;
 		attributeIsolationDelay=attribute_isolation_delay;
-		staticFields[P_ATTRIBUTE_ISOLATION_INDEX]=p_attribute_isolation;
-		staticFields[ATTRIBUTE_ISOLATION_DELAY_INDEX]=attribute_isolation_delay;
+		staticFields[FeedbackGeneType.P_ATTRIBUTE_ISOLATION.ordinal()]=p_attribute_isolation;
+		staticFields[FeedbackGeneType.ATTRIBUTE_ISOLATION_DELAY.ordinal()]=attribute_isolation_delay;
 	}
 
 
@@ -191,8 +193,8 @@ public class Feedback extends Observable implements Observer  {
 
 		verificationModality=verificationModality_;
 
-		staticFields[VERIFICATION_TYPE_INDEX]=verificationType;
-		staticFields[VERIFICATION_MODALITY_INDEX]=verificationModality;
+		staticFields[FeedbackGeneType.VERIFICATION_TYPE.ordinal()]=verificationType;
+		staticFields[FeedbackGeneType.VERIFICATION_MODALITY.ordinal()]=verificationModality;
 
 		includeVerificationText=verificationModality==ALL_VERIFICATION||verificationModality==TEXT_IMAGE_VERIFICATION||verificationModality==TEXT_AUDIO_VERIFICATION||verificationModality==TEXT_VERIFICATION;
 		includeVerificationImage=verificationModality==ALL_VERIFICATION||verificationModality==TEXT_IMAGE_VERIFICATION||verificationModality==IMAGE_AUDIO_VERIFICATION||verificationModality==IMAGE_VERIFICATION;
@@ -229,7 +231,7 @@ public class Feedback extends Observable implements Observer  {
 
 	public void updateFeedbackDelay(int feedback_delay_) {
 		base_feedback_delay=feedback_delay_;
-		staticFields[BASE_DELAY_INDEX]=base_feedback_delay;
+		staticFields[FeedbackGeneType.FEEDBACK_DELAY.ordinal()]=base_feedback_delay;
 	}
 
 
@@ -256,7 +258,7 @@ public class Feedback extends Observable implements Observer  {
 		//highlight those digits in red.
 		int[] userAnswerDigits=problem.getAnswerDigits();
 		int[] solutionDigits=problem.getSolutionDigits(MathProblemSetHandler.MAX_DIGITS_IN_ANSWER);
-	
+
 		int in_solution=0;
 		int in_answer=0;
 		for(;in_answer<userAnswerDigits.length;in_answer++){
@@ -265,7 +267,7 @@ public class Feedback extends Observable implements Observer  {
 			digit.update(ans_digit);
 			digit.updateColor(ProcessingApplication.UI_FONT_COLOR);
 			if(in_answer>=solutionDigits.length){
-			
+
 				digit.updateColor(ERROR_COLOR);
 			}
 			else {
@@ -290,7 +292,7 @@ public class Feedback extends Observable implements Observer  {
 		int[] solutionDigits=problem.getSolutionDigits(MathProblemSetHandler.MAX_DIGITS_IN_ANSWER);
 		//System.out.println("message from feedback; solu digis");
 		//for(int i=0;i<solutionDigits.length;i++)
-			//System.out.println(solutionDigits[i]);
+		//System.out.println(solutionDigits[i]);
 		int in_solu=0;
 		for(;in_solu<solutionDigits.length;in_solu++){   
 			//correctAnswerScreen.clearText();
@@ -582,6 +584,52 @@ public class Feedback extends Observable implements Observer  {
 	}
 
 
+
+	private String parametersAsString="";
+	public String getParametersAsString(){
+		if(parametersAsString.length()==0){
+			if(staticFieldsHaveBeenInitialized()){
+				createRepresentationAsString();
+			}
+		}
+		return parametersAsString;
+	}
+
+
+
+
+	private boolean staticFieldsHaveBeenInitialized() {
+
+		return staticFields[0]!=UNINITIALIZED;
+	}
+
+
+
+
+	private void createRepresentationAsString() {
+
+
+
+		StringBuilder s=new StringBuilder();
+		for(FeedbackGeneType g : FeedbackGeneType.values()){
+			s.append(g.nameOfGene());
+			s.append(": ");
+			double myAllelle=staticFields[g.ordinal()];
+			s.append((myAllelle==DISCOUNT ? "Doesn't matter." : myAllelle));
+			s.append("|");
+		}
+
+		parametersAsString=s.toString();
+
+	}
+
+
+
+
+	public String getName() {
+		// TODO Auto-generated method stub
+		return name;
+	}
 
 
 

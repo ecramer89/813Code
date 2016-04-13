@@ -4,7 +4,7 @@ package mathInterface;
 //contains summary data about how the child did, using the feedbacks from a specific population.
 public class GenerationPerformanceData {
 
-	/* assumes that scores are between 0 and 1 */
+
 	private double averageScore;
 	private double highScore;
 	private double lowScore;
@@ -54,7 +54,7 @@ public class GenerationPerformanceData {
 
 	private void calculateAverageMinAndMax() {
 		highScore=0;
-		lowScore=1;
+		lowScore=10000000;
 		for(int i=0;i<rawScores.length;i++){
 			double x=rawScores[i];
 			if(x>highScore) highScore=x;

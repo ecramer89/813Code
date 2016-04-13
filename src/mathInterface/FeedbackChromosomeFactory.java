@@ -35,9 +35,7 @@ public class FeedbackChromosomeFactory {
 	public static Gene[] getSampleGenes(Configuration conf)
 			throws InvalidConfigurationException {
 
-		Gene textRGene= new IntegerGene(conf, 0, 255);
-		Gene textGGene= new IntegerGene(conf, 0, 255);
-		Gene textBGene= new IntegerGene(conf, 0, 255);
+	
 
 		Gene delayGene = new IntegerGene(conf, 0, MAX_DELAY);
 
@@ -46,14 +44,14 @@ public class FeedbackChromosomeFactory {
 
 
 		Gene pElaborateGene=new DoubleGene(conf, MIN_EVENT_PROBABILITY,1);
-		Gene delayUntilElaborateGene=new IntegerGene(conf, 0,MAX_DELAY);
+		
 		//given elaboration occurred.
 		Gene pAttributeIsolationGene=new DoubleGene(conf, MIN_EVENT_PROBABILITY,1);
 		Gene attributeIsolationDurationGene=new IntegerGene(conf, MIN_SCREEN_DURATION,MAX_SCREEN_DURATION);
 
 
 		Gene pDirectiveGene = new DoubleGene(conf, MIN_EVENT_PROBABILITY, 1);
-		Gene delayUntilDirectiveGene = new IntegerGene(conf, 0, MAX_DELAY);
+		
 		Gene pCorrectAnswerGene = new DoubleGene(conf, MIN_EVENT_PROBABILITY, 1);
 		Gene correctAnswerDelay = new IntegerGene(conf, 0, MAX_DELAY);
 		Gene pErrorFlagGene = new DoubleGene(conf, .99, 1);
@@ -64,30 +62,27 @@ public class FeedbackChromosomeFactory {
 
 
 
-		Gene[] genes = new Gene[GenePosition.values().length];
+		Gene[] genes = new Gene[FeedbackGeneType.values().length];
 
-		genes[GenePosition.FEEDBACK_DELAY.ordinal()] = delayGene;
-		genes[GenePosition.TEXT_COLOR_R.ordinal()]=textRGene;
-		genes[GenePosition.TEXT_COLOR_G.ordinal()]=textGGene;
-		genes[GenePosition.TEXT_COLOR_B.ordinal()]=textBGene;
+		genes[FeedbackGeneType.FEEDBACK_DELAY.ordinal()] = delayGene;
+	
 
-
-		genes[GenePosition.VERIFICATION_MODALITY.ordinal()]=verificationModalityGene;
-		genes[GenePosition.VERIFICATION_TYPE.ordinal()]=verificationTypeGene;		
+		genes[FeedbackGeneType.VERIFICATION_MODALITY.ordinal()]=verificationModalityGene;
+		genes[FeedbackGeneType.VERIFICATION_TYPE.ordinal()]=verificationTypeGene;		
 
 
-		genes[GenePosition.P_ELABORATE.ordinal()]=pElaborateGene;
-		genes[GenePosition.DELAY_UNTIL_ELABORATE.ordinal()]=delayUntilElaborateGene;
-		genes[GenePosition.P_ATTRIBUTE_ISOLATION.ordinal()]=pAttributeIsolationGene;
-		genes[GenePosition.ATTRIBUTE_ISOLATION_DURATION.ordinal()]=attributeIsolationDurationGene;
+		genes[FeedbackGeneType.P_ELABORATE.ordinal()]=pElaborateGene;
+		
+		genes[FeedbackGeneType.P_ATTRIBUTE_ISOLATION.ordinal()]=pAttributeIsolationGene;
+		genes[FeedbackGeneType.ATTRIBUTE_ISOLATION_DELAY.ordinal()]=attributeIsolationDurationGene;
 
-		genes[GenePosition.P_DIRECTIVE.ordinal()]=pDirectiveGene;
-		genes[GenePosition.DIRECTIVE_DELAY.ordinal()]=delayUntilDirectiveGene;
-		genes[GenePosition.P_CORRECT_RESPONSE.ordinal()]=pCorrectAnswerGene;
-		genes[GenePosition.CORRECT_RESPONSE_DELAY.ordinal()]=correctAnswerDelay;
-		genes[GenePosition.P_ERROR_FLAG.ordinal()]=pErrorFlagGene;
-		genes[GenePosition.ERROR_FLAG_DELAY.ordinal()]=errorFlagDelayGene;
-		genes[GenePosition.P_ALLOW_RESUBMIT.ordinal()]=pAllowResubmitGene;
+		genes[FeedbackGeneType.P_DIRECTIVE.ordinal()]=pDirectiveGene;
+	
+		genes[FeedbackGeneType.P_CORRECT_RESPONSE.ordinal()]=pCorrectAnswerGene;
+		genes[FeedbackGeneType.CORRECT_RESPONSE_DELAY.ordinal()]=correctAnswerDelay;
+		genes[FeedbackGeneType.P_ERROR_FLAG.ordinal()]=pErrorFlagGene;
+		genes[FeedbackGeneType.ERROR_FLAG_DELAY.ordinal()]=errorFlagDelayGene;
+		genes[FeedbackGeneType.P_ALLOW_RESUBMIT.ordinal()]=pAllowResubmitGene;
 
 
 		return genes;

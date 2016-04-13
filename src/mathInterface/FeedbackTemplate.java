@@ -6,8 +6,8 @@ import java.util.Map;
 public class FeedbackTemplate {
 
 
-	static Feedback exploratory=new Feedback();
-	static Feedback directive=new Feedback();
+	static Feedback exploratory=new Feedback("Exploratory");
+	static Feedback directive=new Feedback("Directive");
 	static Feedback[] templates=new Feedback[]{exploratory,directive};
 
 	static double[] exploratoryAptitudeWeightings=new double[ProcessingApplication.NUM_APTITUDE_LEVELS];
@@ -15,10 +15,11 @@ public class FeedbackTemplate {
 
 
 	static Map<Feedback, double[]> feedbackAptitudeLookup=new HashMap<Feedback, double[]>();
-
+	AppropriatenessChecker isAppropriate;
+	AppropriatenessChecker isInappropriate;
 
 	//"bad" feedbacks
-	static Feedback preSearch=new Feedback();
+	static Feedback preSearch=new Feedback("PreSearch");
 	static Feedback[] badFeedbacks=new Feedback[]{preSearch};
 
 
@@ -33,6 +34,8 @@ public class FeedbackTemplate {
 		initializeMap();
 		cacheMaxDistanceBetweenFeedbackAndOther();
 		cacheMaximumExpectedFitness();
+		isAppropriate=new IsAppropriate();
+		isInappropriate=new IsInappropriate();
 
 	}
 
@@ -111,9 +114,9 @@ public class FeedbackTemplate {
 
 	private static void cacheMaxDistanceBetweenFeedbackAndOther() {
 		maxDistanceBetweenFeedbacks=0;
-		GenePosition[] genes=GenePosition.values();
+		FeedbackGeneType[] genes=FeedbackGeneType.values();
 		for(int i=0;i<genes.length;i++){
-			GenePosition gp=genes[i];
+			FeedbackGeneType gp=genes[i];
 			maxDistanceBetweenFeedbacks+=Math.pow(gp.allelleRange(),2);
 		}
 		maxDistanceBetweenFeedbacks=Math.sqrt(maxDistanceBetweenFeedbacks);
@@ -201,6 +204,76 @@ public class FeedbackTemplate {
 		double given_proximity_to_bad_feedbacks=calculateFitnessForProximityToBadFeedbacks(feedback, sign);
 
 		return given_child_aptitude+given_proximity_to_bad_feedbacks;
+	}
+
+
+	public String GetAppropriateForAsString(int curr_child_aptitude) {
+		return getStringOfTemplates(curr_child_aptitude, isAppropriate);
+
+	}
+
+	private String getStringOfTemplates(int curr_child_aptitude, AppropriatenessChecker checker){
+		StringBuilder s = new StringBuilder("");
+
+		for(Feedback template : feedbackAptitudeLookup.keySet()){
+			double[] weights=feedbackAptitudeLookup.get(template);
+
+			if(checker.checkAppropriateness(weights, curr_child_aptitude)){
+				s.append(template.getName());
+				s.append("\n");
+			}
+		}
+
+		return s.toString();
+	}
+
+
+
+	public String getInappropriateForAsString(int curr_child_aptitude) {
+		return getStringOfTemplates(curr_child_aptitude, isInappropriate).concat(badFeedbacksAsString());
+
+	}
+
+
+	private String badFeedbacksAsString() {
+	
+		StringBuilder s = new StringBuilder("");
+
+		for(Feedback bad : badFeedbacks){
+		
+				s.append(bad.getName());
+				s.append("\n");
+		
+		}
+
+		return s.toString();
+	}
+
+
+	private abstract class AppropriatenessChecker{
+
+		public abstract boolean checkAppropriateness(double[] weights, int aptitude);
+
+	}
+
+	private class IsAppropriate extends AppropriatenessChecker{
+
+		@Override
+		public boolean checkAppropriateness(double[] weights, int aptitude) {
+
+			return weights[aptitude]>=.5;
+		}
+
+	}
+
+	private class IsInappropriate extends AppropriatenessChecker{
+
+		@Override
+		public boolean checkAppropriateness(double[] weights, int aptitude) {
+
+			return weights[aptitude]<.5;
+		}
+
 	}
 
 
