@@ -627,7 +627,7 @@ public class Feedback extends Observable implements Observer  {
 
 
 	public String getName() {
-		// TODO Auto-generated method stub
+	
 		return name;
 	}
 

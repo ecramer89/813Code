@@ -33,11 +33,11 @@ public class ProcessingApplication extends PApplet implements Observer {
 	public static final int GA_SHAKEUP_PERIOD=2;
 	public static final double THRESHOLD_PERFORMANCE_DECLINE=-.5;
 	public static final int NUM_GENERATIONS=8;
-	public static final int POPULATION_SIZE = 3;
+	public static final int POPULATION_SIZE = 30;
 	public static final int NUM_INDIVIDUALS_TO_SHOW_USER_PER_GENERATION=2;
 
 	//math problem params
-	public static final int MATH_PROBLEMS_PER_SET=2;
+	public static final int MATH_PROBLEMS_PER_SET=4;
 	public static final int MAX_ARGUMENT_VALUE = 9;
 	public static final int MAX_DIGITS_IN_ANSWER =  2;
 
@@ -219,7 +219,7 @@ public class ProcessingApplication extends PApplet implements Observer {
             
 			
 			if(config_timer==0){
-            	appendPopulationDataToDisplayText();
+            	setDisplayTextToSummarizeCurrentPopulation();
             	
             }
             if(config_timer>0) {
@@ -245,7 +245,7 @@ public class ProcessingApplication extends PApplet implements Observer {
 		case SIGNALING_NEXT_INDIVIDUAL:
 			handleTransitionScreen();
 			textSize(20);
-			text(displayText,UI_FONT_SIZE,UI_FONT_SIZE, textDisplayWidth,textDisplayHeight/2);
+			text(displayText,UI_FONT_SIZE,UI_FONT_SIZE, textDisplayWidth,textDisplayHeight);
 			config_timer=delay_before_start_timer-(DELAY_BEFORE_START_TIME-FAKE_CONFIGURATION_DELAY);
             
 			
@@ -256,39 +256,37 @@ public class ProcessingApplication extends PApplet implements Observer {
             	
             	text(config_timer+"",UI_FONT_SIZE,textDisplayHeight/2+UI_FONT_SIZE*3, textDisplayWidth,textDisplayHeight);
             }
-			/*
-			 * want it to say:
-			 * finished evaluating this individual...
-			 * calculating observed fitness...
-			 * observed firtness = 
-			 * 
-			 * calculating total fitness
-			 * expected fitness is
-			 * observd fitness is
-			
-			 * final fitness is 
-			 * 
-			 * 
-			 * 
-			 * 
-			 */
+		
 		
 			return;
 		case UPDATING_POPULATION:
 			handleTransitionScreen();
-			text("All sets completed.", width/2, height/2);
-			text("Configuring next generation of feedbacks... please wait.", width/2, height/2+50);
-			
-			/*
-			 * i also want it to say that it is selecting subset of individuals for presentation to the user.
-			 * want it so say list their fitnesses and to colour them by whether they ar ehigh or low
-			 * and to express the number of high to low individuals its choosing
-			 * 
-			 */
+			textSize(20);
+			text(displayText,UI_FONT_SIZE,UI_FONT_SIZE, textDisplayWidth,textDisplayHeight);
+			config_timer=delay_before_start_timer-(DELAY_BEFORE_START_TIME-FAKE_CONFIGURATION_DELAY*2);
+            
+			if(config_timer==FAKE_CONFIGURATION_DELAY){
+				appendIndividualDataToDisplayText();
+			}
 			
 			
+			if(config_timer==FAKE_CONFIGURATION_DELAY/2){
+				
+				displayText="Thank you. We're now going to use your data- along with the expected fitnesses of the other feedbacks you didn't see- to create a brand new set of feedbacks! \n As before, we'll choose "+NUM_INDIVIDUALS_TO_SHOW_USER_PER_GENERATION+" of these to present to you... \n Generating the new population of feedbacks... please wait.";
 			
-			text(delay_before_start_timer, width/2, height/2+100);
+				
+            }
+			if(config_timer==0){
+				setDisplayTextToSummarizeCurrentPopulation();
+				System.out.println("new display text ");
+				System.out.println(displayText);
+			}
+            if(config_timer>0) {
+            	
+            	text(config_timer+"",UI_FONT_SIZE,textDisplayHeight/2+UI_FONT_SIZE*3, textDisplayWidth,textDisplayHeight);
+            }
+			
+			
 			return;
 			
 			
@@ -314,7 +312,7 @@ public class ProcessingApplication extends PApplet implements Observer {
 	}
 
 
-	private void appendPopulationDataToDisplayText() {
+	private void setDisplayTextToSummarizeCurrentPopulation() {
 		displayText=jgapAdaptor.summarizeCurrentPopulationAsString()+"\n"+jgapAdaptor.summarizeSelectedSubsetAsString();
 	
 	}
@@ -536,6 +534,7 @@ public class ProcessingApplication extends PApplet implements Observer {
 				
 			}
 			else { //next generation
+				
 				childPerformanceMonitor.recordSummaryDataForCurrentPopulation();
 				generationNumber++;
 				
@@ -545,6 +544,7 @@ public class ProcessingApplication extends PApplet implements Observer {
 						shakeUpGeneticAlgorithmOnTheBasisOfIntergenerationalChildPerformance();
 					}
 					configureApplicationForNextGeneration();
+			
 					state=UPDATING_POPULATION;
 					configureApplicationForNextIndividual();
 				}
@@ -555,6 +555,9 @@ public class ProcessingApplication extends PApplet implements Observer {
 			}
 		}
 	}
+
+	
+
 
 	private void setDisplayTextToSummarizeLastIndividual() {
 		StringBuilder s = new StringBuilder("");

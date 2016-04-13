@@ -88,7 +88,13 @@ public class JGAPAdapter implements Iterable<IChromosome> {
 		Gene[] genes=FeedbackChromosomeFactory.getSampleGenes(conf);
 		IChromosome sampleChromosome=new Chromosome(conf, genes);
 		conf.setSampleChromosome(sampleChromosome);
+		conf.setAlwaysCaculateFitness(true);
+		conf.setKeepPopulationSizeConstant(true);
 		conf.setPopulationSize(POPULATION_SIZE);
+		
+		BestChromosomesSelector bc = (BestChromosomesSelector) conf.getNaturalSelectors(false).get(0);
+		bc.setDoubletteChromosomesAllowed(false);
+		bc.setOriginalRate(1);
 
 	}
 
@@ -149,6 +155,7 @@ public class JGAPAdapter implements Iterable<IChromosome> {
 	public void evolveNewIndividuals() {
 
 		genotype.evolve();
+		System.out.println("chromosomes in list "+genotype.getPopulation().getChromosomes().size());
 		selectIndividualsForPresentationToUser();
 	}
 
@@ -157,9 +164,12 @@ public class JGAPAdapter implements Iterable<IChromosome> {
 		selector.selectChromosomesToDisplayToUser(ProcessingApplication.NUM_INDIVIDUALS_TO_SHOW_USER_PER_GENERATION, genotype.getPopulation().getChromosomes(), selectedForPresenationToUser);
 
 
-		if(ProcessingApplication.PRINT_DEBUG_MESSAGES){
+		//if(ProcessingApplication.PRINT_DEBUG_MESSAGES){
 			System.out.println("number of chromo selected "+selectedForPresenationToUser.size());
-		}
+		    for(IChromosome c : selectedForPresenationToUser.keySet()){
+		    	System.out.println(c);
+		    }
+		
 	}
 
 
@@ -216,7 +226,7 @@ public class JGAPAdapter implements Iterable<IChromosome> {
 		s.append("\n");
 		int i=1;
 		for(IChromosome c : selectedForPresenationToUser.keySet()){
-			s.append(i+++". "+Math.round(c.getFitnessValue()));
+			s.append(i+++". "+Math.round(c.getFitnessValueDirectly()));
 			s.append("\n");
 		}
 		return s.toString();
@@ -230,7 +240,7 @@ public class JGAPAdapter implements Iterable<IChromosome> {
 		s.append("\n");
 		double[] fitnesses=new double[n];
 		for(int i=0;i<n;i++){
-			fitnesses[i]=genotype.getPopulation().getChromosome(i).getFitnessValue();
+			fitnesses[i]=genotype.getPopulation().getChromosome(i).getFitnessValueDirectly();
 		}
 		GenerationPerformanceData data=new GenerationPerformanceData(fitnesses);
 		s.append("Average fitness: "+Math.round(data.average()));
