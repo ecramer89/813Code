@@ -54,7 +54,7 @@ public class MathProblemSet {
 
 
 	public int[] getResults() {
-		// TODO Auto-generated method stub
+		
 		return 	user_results;
 	}
 

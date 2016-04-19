@@ -21,9 +21,6 @@ public enum IntergenerationalPerformanceTrend {
 			GenerationPerformanceData[] intergenerationalPerformanceData, int domain_start,
 			int domain_end) {
 
-		System.out.println("--message from intergenerational performance trend--");
-		System.out.println("domain start index: "+domain_start);
-		System.out.println("domain end index: "+domain_end);
 		double average_slope=calculateAverageSlope(intergenerationalPerformanceData, domain_start,
 				domain_end);
 
@@ -35,7 +32,7 @@ public enum IntergenerationalPerformanceTrend {
 
 	private static IntergenerationalPerformanceTrend slopeToTrend(
 			double average_slope) {
-		// TODO Auto-generated method stub
+	
 		if(average_slope>min_improvement) return IMPROVED;
 		if(average_slope<max_decline) return WORSENED;
 		if(average_slope<THRESHOLD_DECLINE) return WORSENED_SEVERELY;

@@ -261,19 +261,20 @@ public class Feedback extends Observable implements Observer  {
 
 		int in_solution=0;
 		int in_answer=0;
-		for(;in_answer<userAnswerDigits.length;in_answer++){
+		for(;in_answer<userAnswerDigits.length;in_answer++, in_solution++){
 			int ans_digit=userAnswerDigits[in_answer];
 			VariableText digit=errorFlagScreen.getVariableText(in_answer);
 			digit.update(ans_digit);
 			digit.updateColor(ProcessingApplication.UI_FONT_COLOR);
 			if(in_answer>=solutionDigits.length){
-
+               
 				digit.updateColor(ERROR_COLOR);
 			}
 			else {
 				int sol_digit=solutionDigits[in_solution];
 				if(ans_digit!=sol_digit){
 					digit.updateColor(ERROR_COLOR);
+					
 				}
 				else {
 					digit.updateColor(ProcessingApplication.UI_FONT_COLOR);
@@ -329,15 +330,14 @@ public class Feedback extends Observable implements Observer  {
 		int[] verificationColor=(data.correct? CORRECT_VERIFICATION_COLOR: INCORRECT_VERIFICATION_COLOR);
 		verification_text.update(verificationMessage);
 		verification_text.updateColor(verificationColor);
-		verificationScreen.setImage(data.correct? correctVerificationImage : incorrectVerificationImage);
+		verificationScreen.setImage((data.correct? correctVerificationImage : incorrectVerificationImage), 0, correctVerificationImage.height);
 
 	}
 
 
 	public void startFeedbackScreens(MathProblem problem){
 		feedbackScreens=new LinkedList<DisplayScreen>();
-		//System.out.println("feedback screens before start "+feedbackScreens.size());
-		//always verify
+	
 		activateScreen(verificationScreen);
 
 

@@ -23,4 +23,11 @@ public class IncreaseMutationRate extends GAShakeupStrategy {
 		
 	}
 
+
+	@Override
+	public String getAuditInformation() {
+		// TODO Auto-generated method stub
+		return "We've increased the number of feedbacks that get mutated.";
+	}
+
 }

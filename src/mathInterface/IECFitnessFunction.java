@@ -104,7 +104,6 @@ public class IECFitnessFunction extends FitnessFunction {
 			if(JGAPAdapter.getInstance().wasSelectedForPresentationToUser(a_subject)){
 				obs_fitness=JGAPAdapter.getInstance().getUserScoreFor(a_subject);
 				obs_fitness*=FeedbackTemplate.getMaximumExpectedFitness();
-
 			}
 			else {
 				weight_expected_fitness=1.0;

@@ -26,13 +26,13 @@ public class ProcessingApplication extends PApplet implements Observer {
     public static final boolean PRINT_DEBUG_MESSAGES=false;
 
 	private static ProcessingApplication processingAppInstance;
-	public static final int APPLICATION_WIDTH=800;
-	public static final int APPLICATION_HEIGHT=600;
+	public static final int APPLICATION_WIDTH=1200;
+	public static final int APPLICATION_HEIGHT=1000;
 
 	//GA params
 	public static final int GA_SHAKEUP_PERIOD=2;
 	public static final double THRESHOLD_PERFORMANCE_DECLINE=-.5;
-	public static final int NUM_GENERATIONS=8;
+	public static final int NUM_GENERATIONS=4;
 	public static final int POPULATION_SIZE = 30;
 	public static final int NUM_INDIVIDUALS_TO_SHOW_USER_PER_GENERATION=2;
 
@@ -67,7 +67,7 @@ public class ProcessingApplication extends PApplet implements Observer {
 	private static final int DELAY_BEFORE_START = 4;
 	private static final int SIGNALING_NEXT_INDIVIDUAL=5;
 
-	public static final int UPDATE_POPULATION_DELAY = 1000;
+	public static final int UPDATE_POPULATION_DELAY = 80;
 	public static final int[] UI_BACKGROUND_COLOR=new int[]{0,0,0};
 	public static final int[] UI_FONT_COLOR=new int[]{255,255,255};
 	public static final int UI_FONT_SIZE = 60;
@@ -86,13 +86,23 @@ public class ProcessingApplication extends PApplet implements Observer {
 	public static final int MED=1;
 	public static final int NUM_APTITUDE_LEVELS=3;
 
-	private static final int FAKE_CONFIGURATION_DELAY = 400;
+	private static final int FAKE_CONFIGURATION_DELAY = 120;
 	
 
 
 	private List<GAShakeupStrategy> shakeupStrategies=new ArrayList<GAShakeupStrategy>();
     private List<GAShakeupStrategy> influenceOrder = new ArrayList<GAShakeupStrategy>();
 
+    
+    private boolean displayShakeUpMessageBeforePopulationStuff;
+
+	private boolean displayIntergenerationalTrendBeforePopStuff;
+    
+    
+    
+    
+    
+    
 	private static int curr_child_aptitude;
 	public static int getCurrentChildAptitude(){
 		return curr_child_aptitude;
@@ -277,9 +287,23 @@ public class ProcessingApplication extends PApplet implements Observer {
 				
             }
 			if(config_timer==0){
-				setDisplayTextToSummarizeCurrentPopulation();
-				System.out.println("new display text ");
-				System.out.println(displayText);
+				if(displayIntergenerationalTrendBeforePopStuff){
+					displayIntergenerationalTrendBeforePopStuff=false;
+					displayText="Oooh you completed "+GA_SHAKEUP_PERIOD+" generations of feedbacks! \n \n that means it is time to check your overall performance trend.";
+					if(displayShakeUpMessageBeforePopulationStuff){
+						displayShakeUpMessageBeforePopulationStuff=false;
+						displayText+="\n Oh no... your performance did not not improve over the generations. \n Don't worry! We're going to try something different.\n Here's what we did: ";
+				        appendActiveGAShakeupInformationToDisplayText();
+					}
+					else if(displayRollbackMessage){
+						displayRollbackMessage=false;
+						displayText+="\n Oh no... your performance worsened quite a lot.\n We'll try setting things back to how they were before.";
+					}
+					else displayText+="\n Looks as though you improved a bit! It seems the current settings and working well for you.";
+					config_timer=(FAKE_CONFIGURATION_DELAY/2)-1;
+				}
+				else setDisplayTextToSummarizeCurrentPopulation();
+				
 			}
             if(config_timer>0) {
             	
@@ -291,11 +315,7 @@ public class ProcessingApplication extends PApplet implements Observer {
 			
 			
 			
-			///add another screen, this one will display:
-			//information about the intergenerational trend
 			
-			//add another screen, this one will display:
-			//information about the shakeup strategy applied (if we apply a shakeup strategy)
 		}
 
 
@@ -306,7 +326,16 @@ public class ProcessingApplication extends PApplet implements Observer {
 
 	
 
-    String fitness_of_last_individual="";
+    private void appendActiveGAShakeupInformationToDisplayText() {
+    	if(influenceOrder.isEmpty())return;
+		GAShakeupStrategy justApplied=influenceOrder.get(influenceOrder.size()-1);
+		displayText+=justApplied.getAuditInformation();
+		
+	}
+    
+
+
+	String fitness_of_last_individual="";
 	private void appendIndividualDataToDisplayText() {
 		displayText=displayText+"\n "+fitness_of_last_individual;
 	}
@@ -484,9 +513,11 @@ public class ProcessingApplication extends PApplet implements Observer {
 
 	private VariableText[] userAnswerDigitsTextObjects=new VariableText[3];
 
+	
+
 
 	private void setupNextProblemAndUpdateUI(){
-	
+		numAttempts=0;
 		VariableText usersAnswerFirstDigit=new VariableText("x",UI_FONT_COLOR,-UI_FONT_SIZE/2-UI_FONT_SIZE/4,0,UI_FONT_SIZE);
 		VariableText usersAnswerSecondDigit=new VariableText("x",UI_FONT_COLOR,0,0,UI_FONT_SIZE);
 		VariableText usersAnswerThirdDigit=new VariableText("x",UI_FONT_COLOR,UI_FONT_SIZE/2+UI_FONT_SIZE/4,0,UI_FONT_SIZE);
@@ -511,9 +542,6 @@ public class ProcessingApplication extends PApplet implements Observer {
 	private void resetFeedbackScreens(){
 		feedbackManifester.resetFeedbackScreens();
 	}
-
-
-
 
 	public void feedbackDone(){
 
@@ -541,10 +569,15 @@ public class ProcessingApplication extends PApplet implements Observer {
 				
 				if(generationNumber<NUM_GENERATIONS){
 					if(generationNumber%GA_SHAKEUP_PERIOD==0){
+						
+						displayIntergenerationalTrendBeforePopStuff=true;
 						shakeUpGeneticAlgorithmOnTheBasisOfIntergenerationalChildPerformance();
+				
 					}
+					
+					
+					
 					configureApplicationForNextGeneration();
-			
 					state=UPDATING_POPULATION;
 					configureApplicationForNextIndividual();
 				}
@@ -573,17 +606,24 @@ public class ProcessingApplication extends PApplet implements Observer {
 
 
 	private boolean shouldShakeUpGeneticAlgorithm(IntergenerationalPerformanceTrend currentTrend){
-		return currentTrend==IntergenerationalPerformanceTrend.WORSENED || currentTrend==IntergenerationalPerformanceTrend.STABLE;
+		return currentTrend==IntergenerationalPerformanceTrend.WORSENED || (currentTrend==IntergenerationalPerformanceTrend.STABLE && !ChildPerformanceMonitor.averageIntergenerationalScoreAboveBaseline());
 	}
 
+	
+	boolean displayRollbackMessage=false;
 	private void shakeUpGeneticAlgorithmOnTheBasisOfIntergenerationalChildPerformance() {
 		IntergenerationalPerformanceTrend currentTrend=childPerformanceMonitor.getCurrentIntergenerationalPerformanceTrend();
 		if(shouldShakeUpGeneticAlgorithm(currentTrend)){
 			 applyRandomStrategyToAlgorithm();
+			 displayShakeUpMessageBeforePopulationStuff=true;
 		}
 		if(shouldRollBackMostRecentStrategy(currentTrend)){
 			rollbackMostRecentStrategy();
+			displayRollbackMessage=true;
 		}
+		
+		
+		 
 
 	}
 	

@@ -20,7 +20,7 @@ public class FeedbackChromosomeFactory {
 	public static final int NUM_VERIFICATION_TYPES=3;
 	public static final int NUM_VERIFCATION_MODALITIES=5;
 
-	public static final double MIN_EVENT_PROBABILITY = .5;
+	public static final double MIN_EVENT_PROBABILITY = .8;
 
 
 
@@ -54,7 +54,7 @@ public class FeedbackChromosomeFactory {
 		
 		Gene pCorrectAnswerGene = new DoubleGene(conf, MIN_EVENT_PROBABILITY, 1);
 		Gene correctAnswerDelay = new IntegerGene(conf, 0, MAX_DELAY);
-		Gene pErrorFlagGene = new DoubleGene(conf, .99, 1);
+		Gene pErrorFlagGene = new DoubleGene(conf, MIN_EVENT_PROBABILITY, 1);
 		Gene errorFlagDelayGene= new IntegerGene(conf, 0, MAX_DELAY);
 
 		Gene pAllowResubmitGene = new DoubleGene(conf,MIN_EVENT_PROBABILITY,1);
@@ -90,18 +90,8 @@ public class FeedbackChromosomeFactory {
 
 	public static void recordUserScoreAsFitnessTermForCurrentFeedback(
 			IChromosome currentGenotype, int[] resultsForProblemSet) {
-
-		if(maximum_weighed_user_score==-1){
-			int[] topScore=new int[resultsForProblemSet.length];
-			for(int i=0;i<topScore.length;i++){
-				topScore[i]=1;
-			}
-			maximum_weighed_user_score=resultsToFitness(topScore);
-			if(ProcessingApplication.PRINT_DEBUG_MESSAGES){
-				System.out.println("message from FeedbackChromosome Factory: ");
-				System.out.println("max weighted score: "+maximum_weighed_user_score);
-				}
-		}
+		recordMaximumUserScoreIfNecessary(resultsForProblemSet);
+		
 		double scoreAsFitness=resultsToFitness(resultsForProblemSet);
 		scoreAsFitness/=maximum_weighed_user_score;
 		if(ProcessingApplication.PRINT_DEBUG_MESSAGES){
@@ -111,6 +101,20 @@ public class FeedbackChromosomeFactory {
 		JGAPAdapter.getInstance().setUserScoreFor(currentGenotype, scoreAsFitness);
 
 	}
+	
+	private static void recordMaximumUserScoreIfNecessary(int[] resultsForProblemSet){
+		if(maximum_weighed_user_score==-1){
+			int[] topScore=new int[resultsForProblemSet.length];
+			for(int i=0;i<topScore.length;i++){
+				topScore[i]=1;
+			}
+			maximum_weighed_user_score=resultsToFitness(topScore);
+				
+		}
+	}
+	
+	
+	
 
 	private static double resultsToFitness(int[] results) {
 		double result=0;
@@ -122,7 +126,7 @@ public class FeedbackChromosomeFactory {
 	}
 
 	private static double transferFunction(double problemNumber) {
-		double result=(10/(1+100*Math.pow(Math.E,-problemNumber)))/10;
+		double result=(10/(1+100*Math.pow(Math.E,-problemNumber)));
 
 		if(ProcessingApplication.PRINT_DEBUG_MESSAGES){
 			System.out.println("message from feedback chromosome factory: ");

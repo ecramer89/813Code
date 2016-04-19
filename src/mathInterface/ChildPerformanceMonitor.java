@@ -5,6 +5,8 @@ package mathInterface;
 public class ChildPerformanceMonitor {
 
 
+	private static final double BASELINE = .7;
+
 	private static ChildPerformanceMonitor instance;
 
 	GenerationPerformanceData[] intergenerationalPerformanceData=new GenerationPerformanceData[ProcessingApplication.NUM_GENERATIONS];
@@ -74,24 +76,31 @@ public class ChildPerformanceMonitor {
 
 
 	public IntergenerationalPerformanceTrend getCurrentIntergenerationalPerformanceTrend(){
-		if(ProcessingApplication.PRINT_DEBUG_MESSAGES){
-			System.out.println("message from child performance monitor: ");
-
-			System.out.println("you just asked me to calculate the current trend...: ");
-			System.out.println("what I have recorded for each individual so far: ");
-			for(int i=0;i<intergenerationalPerformanceData.length;i++){
-				GenerationPerformanceData d=intergenerationalPerformanceData[i];
-				System.out.println("at index "+ i+" I have recorded: "+d);
-			}
-		}
+	
 
 			IntergenerationalPerformanceTrend result= IntergenerationalPerformanceTrend.calculateTrend(intergenerationalPerformanceData,index_of_baseline_generation,index_of_current_generation);
+			calculateAverageScoreAboveBaseline(intergenerationalPerformanceData,index_of_baseline_generation,index_of_current_generation);
+			
 			index_of_baseline_generation=index_of_current_generation;
+			
 			return result;
 		}
 
 
 
+	static double avgscore_for_gen;
+		private void calculateAverageScoreAboveBaseline(
+			GenerationPerformanceData[] intergenerationalPerformanceData,
+			int index_of_baseline_generation, int index_of_current_generation) {
+		
+		avgscore_for_gen=(intergenerationalPerformanceData[index_of_baseline_generation].average()+intergenerationalPerformanceData[index_of_current_generation].average())/2;
+        
+		
+		}
+		
+		public static boolean averageIntergenerationalScoreAboveBaseline(){
+			return avgscore_for_gen>BASELINE;
+		}
 
 		private double summarize(int[] resultsForIndividual) {
 			double score=0;

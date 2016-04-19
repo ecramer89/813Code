@@ -27,5 +27,13 @@ public class RewardDeviationFromTemplates extends GAShakeupStrategy {
 		
 	}
 
+
+
+	@Override
+	public String getAuditInformation() {
+		// TODO Auto-generated method stub
+		return " We've inverted the sign of the fitness function. Now it will reward feedbacks that are FAR from best practice templates and that are CLOSE TO 'worst' templates.";
+	}
+
 	
 }

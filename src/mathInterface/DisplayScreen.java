@@ -55,7 +55,7 @@ public class DisplayScreen extends Observable {
 		time_elapsed_since_activated=0;
 	}
 
-	public void setImage(PImage img){
+	public void setImage(PImage img, int img_offset_x, int img_offset_y){
 		this.img=img;
 		if(this.img!=null){
 			
@@ -63,7 +63,8 @@ public class DisplayScreen extends Observable {
 				img.resize(img.width/2, img.height/2);
 			}
 			
-			adjustImageOffset(text_offset_x,text_offset_y+text_size);
+			this.img_offset_x=img_offset_x;
+			this.img_offset_y=img_offset_y;
 		
 		}	
 	}
@@ -236,19 +237,19 @@ public class DisplayScreen extends Observable {
 
 
 	public VariableText getVariableText(int index) {
-		// TODO Auto-generated method stub
+	
 		return text.get(index);
 	}
 
 
 	public int getDelayBeforeDisplay() {
-		// TODO Auto-generated method stub
+	
 		return delay_time;
 	}
 
 
 	public int getDurationOfDisplay() {
-		// TODO Auto-generated method stub
+	
 		return display_time;
 	}
 

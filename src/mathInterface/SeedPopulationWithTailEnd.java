@@ -38,4 +38,12 @@ public class SeedPopulationWithTailEnd extends GAShakeupStrategy {
 
 
 
+	@Override
+	public String getAuditInformation() {
+		// TODO Auto-generated method stub
+		return " We've made it so the set of feedbacks you see includes more of the so-called 'least fit' feedbacks and fewer of the so-called 'most fit'";
+	}
+
+
+
 }

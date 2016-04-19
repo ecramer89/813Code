@@ -45,6 +45,14 @@ public class AdjustWeights extends GAShakeupStrategy {
 		
 		}
 
+
+
+		@Override
+		public String getAuditInformation() {
+		
+			return " We've adjusted the relative weighting of the expected and observed fitness terms.";
+		}
+
 	
 
 	}

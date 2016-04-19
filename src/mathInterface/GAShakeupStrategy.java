@@ -37,6 +37,9 @@ public abstract class GAShakeupStrategy {
 		return populationBeforeAction;
 	}
 
+
+	public abstract String getAuditInformation();
+
 }
 
 

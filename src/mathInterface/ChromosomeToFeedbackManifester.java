@@ -31,9 +31,6 @@ public class ChromosomeToFeedbackManifester  {
 	private static IChromosome curr_genotype;
 	private static Feedback curr_phenotype;
 
-   public String currFeedback(){
-	   return curr_phenotype.toString();
-   }
 
 	private ChromosomeToFeedbackManifester(){
 		processing=(ProcessingApplication) ProcessingApplication.getInstance();
@@ -42,9 +39,15 @@ public class ChromosomeToFeedbackManifester  {
 	
 	private void loadImages() {
 		ProcessingApplication processing=ProcessingApplication.getInstance();
-		DEFAULT_INCORRECT_VERIFICATION_IMAGE=processing.loadImage("C:/Users/root960/Desktop/emily/IAT813/project/applicationData/images/incorrect.png");
-		DEFAULT_CORRECT_VERIFICATION_IMAGE=processing.loadImage("C:/Users/root960/Desktop/emily/IAT813/project/applicationData/images/correct.png");
+		
+		/* change the absolute file paths of these images */
+		DEFAULT_INCORRECT_VERIFICATION_IMAGE=processing.loadImage("C:/Users/root960/Desktop/emily/IAT813/project/CodeBackup/GPInteraction/applicationData/images/incorrect.png");
+		DEFAULT_CORRECT_VERIFICATION_IMAGE=processing.loadImage("C:/Users/root960/Desktop/emily/IAT813/project/CodeBackup/GPInteraction/applicationData/images/correct.png");
 	}
+	
+	   public String currFeedback(){
+		   return curr_phenotype.toString();
+	   }
 	
 	public static IChromosome getCurrentGenotype(){
 		return curr_genotype;
@@ -108,7 +111,8 @@ public class ChromosomeToFeedbackManifester  {
 
 	private static void updateVerificationParameters(Feedback phenotype, IChromosome genotype) {
 
-		phenotype.updateVerificationParameters(getIntegerAllelle(FeedbackGeneType.VERIFICATION_TYPE, genotype),getIntegerAllelle(FeedbackGeneType.VERIFICATION_MODALITY, genotype));
+		//phenotype.updateVerificationParameters(getIntegerAllelle(FeedbackGeneType.VERIFICATION_TYPE, genotype),getIntegerAllelle(FeedbackGeneType.VERIFICATION_MODALITY, genotype));
+		phenotype.updateVerificationParameters(getIntegerAllelle(FeedbackGeneType.VERIFICATION_TYPE, genotype),Feedback.TEXT_IMAGE_VERIFICATION);
 	}
 
 
